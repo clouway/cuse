@@ -31,7 +31,7 @@ public class Search<T> {
       this.indexingStrategyCatalog = indexingStrategyCatalog;
     }
 
-    public SearchBuilder<T> addFilter(String field, SearchMatcher matcher) {
+    public SearchBuilder<T> where(String field, SearchMatcher matcher) {
       filters.put(field, matcher);
       return this;
     }

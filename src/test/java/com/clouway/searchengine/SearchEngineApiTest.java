@@ -78,7 +78,7 @@ public class SearchEngineApiTest {
     entityLoader.store(dog.id, dog);
     searchEngine.register(dog);
 
-    List<Dog> dogs = searchEngine.search(Dog.class).addFilter("name", SearchMatchers.is("Jack")).returnAll().now();
+    List<Dog> dogs = searchEngine.search(Dog.class).where("name", SearchMatchers.is("Jack")).returnAll().now();
 
     assertThat(dogs.size(), is(equalTo(1)));
     assertThat(dogs.get(0).name, is(equalTo("Jack")));
