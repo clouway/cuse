@@ -24,6 +24,8 @@ public class Search<T> {
     private EntityLoader entityLoader;
     private IndexingStrategyCatalog indexingStrategyCatalog;
     private Map<String, SearchMatcher> filters = new HashMap<String, SearchMatcher>();
+    private String query = "";
+    private String index;
 
     public SearchBuilder(Class clazz, EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog) {
       this.clazz = clazz;
@@ -36,6 +38,16 @@ public class Search<T> {
       return this;
     }
 
+    public SearchBuilder<T> where(SearchMatcher matcher) {
+      this.query = matcher.getValue();
+      return this;
+    }
+
+    public SearchBuilder<T> inIndex(Class aClass) {
+      this.index = aClass.getSimpleName();
+      return this;
+    }
+
     public Search<T> returnAll() {
 
       Search<T> search = new Search<T>( );
@@ -43,6 +55,8 @@ public class Search<T> {
       search.filters = filters;
       search.entityLoader = entityLoader;
       search.indexingStrategyCatalog = indexingStrategyCatalog;
+      search.query = query;
+      search.index = index;
 
       return search;
     }
@@ -52,29 +66,43 @@ public class Search<T> {
   private Map<String, SearchMatcher> filters;
   private EntityLoader entityLoader;
   private IndexingStrategyCatalog indexingStrategyCatalog;
+  private String query;
+  private String index;
+  private int limit;
 
   private Search() {
   }
 
   public List<T> now() {
 
-    String queryStr = "";
+    StringBuilder queryBuilder = new StringBuilder();
 
-    StringBuilder paramsQuery = new StringBuilder();
-
-    for (String fieldName : filters.keySet()) {
-      StringBuilder builder = new StringBuilder();
-      builder.append(fieldName).append(":").append(filters.get(fieldName).getValue());
-      paramsQuery.append(builder).append(" ");
+    for (String filter : filters.keySet()) {
+      StringBuilder filterBuilder = new StringBuilder();
+      filterBuilder.append(filter).append(":").append(filters.get(filter).getValue());
+      queryBuilder.append(filterBuilder).append(" ");
     }
 
-    queryStr = paramsQuery.append(queryStr).toString();
+    String searchQuery = this.query + queryBuilder.toString();
 
-    QueryOptions.Builder optionsBuilder = QueryOptions.newBuilder().setReturningIdsOnly(true);
 
-    Query query = Query.newBuilder().setOptions(optionsBuilder.build()).build(queryStr);
 
-    String indexName = indexingStrategyCatalog.get(clazz).getIndexName();
+    QueryOptions.Builder queryOptionsBuilder = QueryOptions.newBuilder().setReturningIdsOnly(true);
+
+    if (limit > 0) {
+      queryOptionsBuilder.setLimit(limit);
+    }
+
+    Query query = Query.newBuilder().setOptions(queryOptionsBuilder.build()).build(searchQuery);
+
+    String indexName;
+
+    if (index != null && index.length() > 0) {
+      indexName = index;
+    } else {
+      indexName = indexingStrategyCatalog.get(clazz).getIndexName();
+    }
+
     Results<ScoredDocument> results = SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
                                                                              .setName(indexName)
                                                                              .setConsistency(Consistency.PER_DOCUMENT))
@@ -86,5 +114,10 @@ public class Search<T> {
     }
 
     return entityLoader.loadAll(clazz, entityIds);
+  }
+
+  public Search<T> limit(int limit) {
+    this.limit = limit;
+    return this;
   }
 }

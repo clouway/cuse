@@ -28,12 +28,12 @@ public class SearchEngineImpl implements SearchEngine {
 
     Class instanceClass = instance.getClass();
     IndexingStrategy strategy = indexingStrategyCatalog.get(instanceClass);
-    String docId = strategy.getId(instance);
+    String documentId = strategy.getId(instance);
     String indexName = strategy.getIndexName();
     List<String> indexingFields = strategy.getFields();
 
-    Document.Builder builder = Document.newBuilder();
-    builder.setId(String.valueOf(docId));
+    Document.Builder documentBuilder = Document.newBuilder();
+    documentBuilder.setId(String.valueOf(documentId));
 
     Map<String, String> textFieldMap = new HashMap<String, String>();
     for (java.lang.reflect.Field field : instanceClass.getDeclaredFields()) {
@@ -55,10 +55,10 @@ public class SearchEngineImpl implements SearchEngine {
 
     for (String fieldName : textFieldMap.keySet()) {
       String value = textFieldMap.get(fieldName);
-      builder.addField(Field.newBuilder().setName(fieldName).setText(value));
+      documentBuilder.addField(Field.newBuilder().setName(fieldName).setText(value));
     }
 
-    loadIndex(indexName).add(builder.build());
+    loadIndex(indexName).add(documentBuilder.build());
   }
 
   public Search.SearchBuilder search(Class clazz) {

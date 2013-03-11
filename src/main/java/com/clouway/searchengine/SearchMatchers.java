@@ -12,4 +12,8 @@ public class SearchMatchers {
   public static SearchMatcher isAnyOf(String... values) {
     return new OrSearchMatcher(values);
   }
+
+  public static SearchMatcher query(String query) {
+    return new QuerySearchMatcher(query);
+  }
 }
