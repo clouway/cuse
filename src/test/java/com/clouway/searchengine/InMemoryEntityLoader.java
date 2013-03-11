@@ -4,45 +4,44 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
 public class InMemoryEntityLoader implements EntityLoader {
 
-  Map<Class<?>, List<Long>> ids = new HashMap<Class<?>, List<Long>>();
+  Map<Class<?>, List<Long>> classes = new HashMap<Class<?>, List<Long>>();
   Map<Long, Object> objects = new HashMap<Long, Object>();
 
-  public void store(Long id, Object object) {
+  public void store(Long objectId, Object object) {
 
-    if (ids.containsKey(object.getClass())) {
-      List<Long> longs = ids.get(object.getClass());
-      longs.add(id);
+    if (classes.containsKey(object.getClass())) {
+      List<Long> values = classes.get(object.getClass());
+      values.add(objectId);
     } else {
 
-      Class<?> key = object.getClass();
-      List<Long> value = new ArrayList<Long>();
-      value.add(id);
+      Class<?> aClass = object.getClass();
+      List<Long> values = new ArrayList<Long>();
+      values.add(objectId);
 
-      ids.put(key, value);
+      classes.put(aClass, values);
     }
 
-    objects.put(id, object);
+    objects.put(objectId, object);
   }
 
   public <T> List<T> loadAll(Class<T> clazz, List<String> entityIds) {
 
-    Set<Class<?>> classes = ids.keySet();
-
     List<T> result = new ArrayList<T>();
 
-    for (Class<?> aClass : classes) {
-      if (aClass.equals(clazz)) {
-        List<Long> values = ids.get(aClass);
+    if (classes.containsKey(clazz)) {
 
-        for (Long value : values) {
-          Object object = objects.get(value);
+      List<Long> values = classes.get(clazz);
+
+      for (String entityId : entityIds) {
+
+        if (values.contains(Long.valueOf(entityId))) {
+          Object object = objects.get(Long.valueOf(entityId));
           result.add((T) object);
         }
       }

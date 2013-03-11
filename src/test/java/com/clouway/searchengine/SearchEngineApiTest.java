@@ -6,7 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -37,9 +37,7 @@ public class SearchEngineApiTest {
 
     @Override
     public List<String> getFields() {
-      List<String> fields = new ArrayList<String>();
-      fields.add("name");
-      return fields;
+      return Arrays.asList("name");
     }
 
     @Override

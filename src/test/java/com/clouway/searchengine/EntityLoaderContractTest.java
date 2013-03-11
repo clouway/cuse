@@ -15,7 +15,7 @@ import static org.hamcrest.core.Is.is;
 public abstract class EntityLoaderContractTest {
 
   @Test
-  public void emptyList() {
+  public void loadEmptyList() {
 
     EntityLoader entityLoader = createEntityLoader();
 
@@ -25,7 +25,7 @@ public abstract class EntityLoaderContractTest {
   }
 
   @Test
-  public void listWithOneEntity() {
+  public void loadListWithOneEntity() {
 
     store(1l, new Entity(1l));
 
@@ -38,7 +38,7 @@ public abstract class EntityLoaderContractTest {
   }
 
   @Test
-  public void listWithTwoEntities() {
+  public void loadListWithTwoEntities() {
 
     store(1l, new Entity(1l));
     store(2l, new Entity(2l));
@@ -50,6 +50,18 @@ public abstract class EntityLoaderContractTest {
     assertThat(result.size(), is(2));
     assertThat(result.get(0).id, is(1l));
     assertThat(result.get(1).id, is(2l));
+  }
+
+  @Test
+  public void emptyListIsReturnedWhenLoadingNotStoredEntity() {
+
+    store(1l, new Entity(1l));
+
+    EntityLoader entityLoader = createEntityLoader();
+
+    List<Entity> result = entityLoader.loadAll(Entity.class, Arrays.asList(String.valueOf(2l)));
+
+    assertThat(result.size(), is(0));
   }
 
   public abstract EntityLoader createEntityLoader();
