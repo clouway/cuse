@@ -7,6 +7,7 @@ import com.google.appengine.api.search.QueryOptions;
 import com.google.appengine.api.search.Results;
 import com.google.appengine.api.search.ScoredDocument;
 import com.google.appengine.api.search.SearchServiceFactory;
+import com.google.appengine.repackaged.com.google.common.base.Strings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,14 +79,20 @@ public class Search<T> {
     StringBuilder queryBuilder = new StringBuilder();
 
     for (String filter : filters.keySet()) {
+
+      String filterValue = filters.get(filter).getValue().trim();
+
+      if (Strings.isNullOrEmpty(filterValue)) {
+        throw new EmptySearchMatcherException();
+      }
+
       StringBuilder filterBuilder = new StringBuilder();
-      filterBuilder.append(filter).append(":").append(filters.get(filter).getValue());
+      filterBuilder.append(filter).append(":").append(filterValue);
+
       queryBuilder.append(filterBuilder).append(" ");
     }
 
     String searchQuery = this.query + queryBuilder.toString();
-
-
 
     QueryOptions.Builder queryOptionsBuilder = QueryOptions.newBuilder().setReturningIdsOnly(true);
 

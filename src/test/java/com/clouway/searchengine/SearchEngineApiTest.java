@@ -117,7 +117,7 @@ public class SearchEngineApiTest {
     assertThat(result.size(), is(0));
   }
 
-  @Test
+  @Test(expected = EmptySearchMatcherException.class)
   public void searchByEmptyFieldValue() {
 
     Dog dog = new Dog(1l, "Jack");
@@ -126,6 +126,19 @@ public class SearchEngineApiTest {
     searchEngine.register(dog);
 
     List<Dog> result = searchEngine.search(Dog.class).where("name", SearchMatchers.is("")).returnAll().now();
+
+    assertThat(result.size(), is(0));
+  }
+
+  @Test(expected = EmptySearchMatcherException.class)
+  public void searchByFieldValueContainingOnlyWhiteSpaces() {
+
+    Dog dog = new Dog(1l, "Jack");
+
+    entityLoader.store(dog.id, dog);
+    searchEngine.register(dog);
+
+    List<Dog> result = searchEngine.search(Dog.class).where("name", SearchMatchers.is("   ")).returnAll().now();
 
     assertThat(result.size(), is(0));
   }
