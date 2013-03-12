@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -17,41 +16,6 @@ import static org.junit.Assert.assertThat;
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
 public class SearchEngineApiTest {
-
-  class UserIndexingStrategy implements IndexingStrategy<User> {
-
-    public String getIndexName() {
-      return User.class.getSimpleName();
-    }
-
-    @Override
-    public List<String> getFields() {
-      return Arrays.asList("name");
-    }
-
-    @Override
-    public String getId(User user) {
-      return user.id.toString();
-    }
-  }
-
-  class EmployeeIndexingStrategy implements IndexingStrategy<Employee> {
-
-    @Override
-    public String getIndexName() {
-      return Employee.class.getSimpleName();
-    }
-
-    @Override
-    public List<String> getFields() {
-      return Arrays.asList("firstName", "lastName");
-    }
-
-    @Override
-    public String getId(Employee employee) {
-      return String.valueOf(employee.id);
-    }
-  }
 
   private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalSearchServiceTestConfig());
   private InMemoryEntityLoader entityLoader;
@@ -323,38 +287,5 @@ public class SearchEngineApiTest {
     List<User> result = searchEngine.search(User.class).returnAll().now();
 
     assertThat(result.size(), is(0));
-  }
-
-  class User {
-
-    public Long id;
-    public String name;
-
-    public User(Long id) {
-      this.id = id;
-    }
-
-    public User(Long id, String name) {
-      this.id = id;
-      this.name = name;
-    }
-  }
-
-  class Employee {
-
-    public Long id;
-    public String firstName;
-    public String lastName;
-
-    public Employee(Long id, String firstName) {
-      this.id = id;
-      this.firstName = firstName;
-    }
-
-    public Employee(Long id, String firstName, String lastName) {
-      this.id = id;
-      this.firstName = firstName;
-      this.lastName = lastName;
-    }
   }
 }

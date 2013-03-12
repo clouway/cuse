@@ -83,7 +83,7 @@ public class Search<T> {
       String filterValue = filters.get(filter).getValue().trim();
 
       if (Strings.isNullOrEmpty(filterValue)) {
-        throw new EmptySearchMatcherException();
+        throw new EmptyMatcherException();
       }
 
       StringBuilder filterBuilder = new StringBuilder();
@@ -98,6 +98,10 @@ public class Search<T> {
 
     if (limit > 0) {
       queryOptionsBuilder.setLimit(limit);
+    }
+
+    if (Strings.isNullOrEmpty(searchQuery)) {
+      throw new InvalidSearchException();
     }
 
     Query query = Query.newBuilder().setOptions(queryOptionsBuilder.build()).build(searchQuery);
