@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class InMemoryEntityLoader implements EntityLoader {
+public class InMemoryRepository implements EntityLoader {
 
   Map<Class<?>, List<Long>> classes = new HashMap<Class<?>, List<Long>>();
   Map<Long, Object> objects = new HashMap<Long, Object>();

@@ -5,22 +5,22 @@ import org.junit.Before;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class InMemoryEntityLoaderTest extends EntityLoaderContractTest {
+public class InMemoryRepositoryTest extends EntityLoaderContractTest {
 
-  InMemoryEntityLoader entityLoader;
+  InMemoryRepository repository;
 
   @Before
   public void setUp() {
-    entityLoader = new InMemoryEntityLoader();
+    repository = new InMemoryRepository();
   }
 
   @Override
   public EntityLoader createEntityLoader() {
-    return entityLoader;
+    return repository;
   }
 
   @Override
   public void store(Long id, Object object) {
-    entityLoader.store(id, object);
+    repository.store(id, object);
   }
 }

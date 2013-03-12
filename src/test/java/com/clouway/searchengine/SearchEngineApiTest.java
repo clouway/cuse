@@ -18,15 +18,15 @@ import static org.junit.Assert.assertThat;
 public class SearchEngineApiTest {
 
   private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalSearchServiceTestConfig());
-  private InMemoryEntityLoader entityLoader;
+  private InMemoryRepository repository;
   private SearchEngine searchEngine;
 
   @Before
   public void setUp() {
     helper.setUp();
-    entityLoader = new InMemoryEntityLoader();
+    repository = new InMemoryRepository();
 
-    searchEngine = new SearchEngineImpl(entityLoader, new IndexingStrategyCatalog() {
+    searchEngine = new SearchEngineImpl(repository, new IndexingStrategyCatalog() {
       @Override
       public IndexingStrategy get(Class aClass) {
 
@@ -174,7 +174,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchInGivenIndex() {
 
-    entityLoader.store(1l, new User(1l));
+    repository.store(1l, new User(1l));
     searchEngine.register(new Employee(1l, "John"));
 
     List<User> result = searchEngine.search(User.class).inIndex(Employee.class)
@@ -236,7 +236,7 @@ public class SearchEngineApiTest {
   @Test(expected = InvalidIndexingStrategyException.class)
   public void notConfiguredIndexingStrategy() {
 
-    searchEngine = new SearchEngineImpl(entityLoader, new IndexingStrategyCatalog() {
+    searchEngine = new SearchEngineImpl(repository, new IndexingStrategyCatalog() {
       @Override
       public IndexingStrategy get(Class aClass) {
         return null;
@@ -250,10 +250,18 @@ public class SearchEngineApiTest {
     assertThat(result.size(), is(0));
   }
 
+  @Test
+  public void searchReturnsListOfObjectsIds() {
+
+    store(new User(1l, "John Adams"), new User(2l, "John Parker"));
+
+
+  }
+
   private void store(User... users) {
 
     for (User user : users) {
-      entityLoader.store(user.id, user);
+      repository.store(user.id, user);
       searchEngine.register(user);
     }
   }
@@ -261,7 +269,7 @@ public class SearchEngineApiTest {
   private void store(Employee... employees) {
 
     for (Employee employee : employees) {
-      entityLoader.store(employee.id, employee);
+      repository.store(employee.id, employee);
       searchEngine.register(employee);
     }
   }
