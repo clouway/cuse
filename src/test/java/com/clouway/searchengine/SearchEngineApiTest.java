@@ -222,6 +222,23 @@ public class SearchEngineApiTest {
     assertThat(result.size(), is(0));
   }
 
+  @Test(expected = InvalidIndexingStrategyException.class)
+  public void notConfiguredIndexingStrategy() {
+
+    searchEngine = new SearchEngineImpl(entityLoader, new IndexingStrategyCatalog() {
+      @Override
+      public IndexingStrategy get(Class aClass) {
+        return null;
+      }
+    });
+
+    store(new User(1l, "John"));
+
+    List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.is("John")).returnAll().now();
+
+    assertThat(result.size(), is(0));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {

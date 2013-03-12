@@ -28,34 +28,38 @@ public class SearchEngineImpl implements SearchEngine {
 
     Class instanceClass = instance.getClass();
     IndexingStrategy strategy = indexingStrategyCatalog.get(instanceClass);
+
+    if (strategy == null) {
+      throw new InvalidIndexingStrategyException();
+    }
+
     String documentId = strategy.getId(instance);
     String indexName = strategy.getIndexName();
     List<String> indexingFields = strategy.getFields();
 
-    Document.Builder documentBuilder = Document.newBuilder();
-    documentBuilder.setId(String.valueOf(documentId));
+    Document.Builder documentBuilder = Document.newBuilder().setId(documentId);
 
-    Map<String, String> textFieldMap = new HashMap<String, String>();
+    Map<String, String> documentFields = new HashMap<String, String>();
     for (java.lang.reflect.Field field : instanceClass.getDeclaredFields()) {
 
       if (indexingFields.contains(field.getName())) {
 
-        String value = "";
+        String fieldValue = "";
         try {
-          value = String.valueOf(instanceClass.getField(field.getName()).get(instance));
+          fieldValue = String.valueOf(instanceClass.getField(field.getName()).get(instance));
         } catch (NoSuchFieldException e) {
           e.printStackTrace();
         } catch (IllegalAccessException e) {
           e.printStackTrace();
         }
 
-        textFieldMap.put(field.getName(), value);
+        documentFields.put(field.getName(), fieldValue);
       }
     }
 
-    for (String fieldName : textFieldMap.keySet()) {
-      String value = textFieldMap.get(fieldName);
-      documentBuilder.addField(Field.newBuilder().setName(fieldName).setText(value));
+    for (String field : documentFields.keySet()) {
+      String fieldValue = documentFields.get(field);
+      documentBuilder.addField(Field.newBuilder().setName(field).setText(fieldValue));
     }
 
     loadIndex(indexName).add(documentBuilder.build());
@@ -67,7 +71,7 @@ public class SearchEngineImpl implements SearchEngine {
 
   private Index loadIndex(String indexName) {
     return SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
-            .setName(indexName)
-            .setConsistency(Consistency.PER_DOCUMENT));
+                                                  .setName(indexName)
+                                                  .setConsistency(Consistency.PER_DOCUMENT));
   }
 }
