@@ -53,7 +53,7 @@ public abstract class EntityLoaderContractTest {
   }
 
   @Test
-  public void loadingNotStoredEntity() {
+  public void loadNotStoredEntity() {
 
     store(1l, new Entity(1l));
 

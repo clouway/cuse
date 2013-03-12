@@ -5,7 +5,7 @@ package com.clouway.searchengine;
  */
 public class OrSearchMatcher implements SearchMatcher {
 
-  private String[] values;
+  private final String[] values;
 
   public OrSearchMatcher(String... values) {
     this.values = values;

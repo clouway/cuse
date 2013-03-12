@@ -46,10 +46,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByMatchingFieldValue() {
 
-    User dog = new User(1l, "Jack");
-
-    entityLoader.store(dog.id, dog);
-    searchEngine.register(dog);
+    store(new User(1l, "Jack"));
 
     List<User> dogs = searchEngine.search(User.class).where("name", SearchMatchers.is("Jack")).returnAll().now();
 
@@ -60,10 +57,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByNotMatchingFieldValue() {
 
-    User dog = new User(1l, "Jack");
-
-    entityLoader.store(dog.id, dog);
-    searchEngine.register(dog);
+    store(new User(1l, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.is("Jim")).returnAll().now();
 
@@ -73,10 +67,7 @@ public class SearchEngineApiTest {
   @Test(expected = EmptyMatcherException.class)
   public void searchByEmptyFieldValue() {
 
-    User dog = new User(1l, "Jack");
-
-    entityLoader.store(dog.id, dog);
-    searchEngine.register(dog);
+    store(new User(1l, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.is("")).returnAll().now();
 
@@ -86,10 +77,7 @@ public class SearchEngineApiTest {
   @Test(expected = EmptyMatcherException.class)
   public void searchByFieldValueContainingOnlyWhiteSpaces() {
 
-    User dog = new User(1l, "Jack");
-
-    entityLoader.store(dog.id, dog);
-    searchEngine.register(dog);
+    store(new User(1l, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.is("   ")).returnAll().now();
 
@@ -99,10 +87,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByNotExistingFieldValue() {
 
-    User dog = new User(1l, "Jack");
-
-    entityLoader.store(dog.id, dog);
-    searchEngine.register(dog);
+    store(new User(1l, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("age", SearchMatchers.is("12")).returnAll().now();
 
@@ -112,13 +97,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByMatchingAnyOfTheGivenValues() {
 
-    User dog = new User(1l, "Jack");
-    User anotherDog = new User(2l, "Jim");
-
-    entityLoader.store(dog.id, dog);
-    entityLoader.store(anotherDog.id, anotherDog);
-    searchEngine.register(dog);
-    searchEngine.register(anotherDog);
+    store(new User(1l, "Jack"), new User(2l, "Jim"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.isAnyOf("Jack", "Jim")).returnAll().now();
 
@@ -130,13 +109,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByMatchingOneValueThatMatchesAny() {
 
-    User dog = new User(1l, "Jack");
-    User anotherDog = new User(2l, "Jim");
-
-    entityLoader.store(dog.id, dog);
-    entityLoader.store(anotherDog.id, anotherDog);
-    searchEngine.register(dog);
-    searchEngine.register(anotherDog);
+    store(new User(1l, "Jack"), new User(2l, "Jim"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.isAnyOf("Jim")).returnAll().now();
 
@@ -147,13 +120,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByMatchingAnyValuesForNotExistingField() {
 
-    User dog = new User(1l, "Jack");
-    User anotherDog = new User(2l, "Jim");
-
-    entityLoader.store(dog.id, dog);
-    entityLoader.store(anotherDog.id, anotherDog);
-    searchEngine.register(dog);
-    searchEngine.register(anotherDog);
+    store(new User(1l, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("age", SearchMatchers.isAnyOf("12", "14")).returnAll().now();
 
@@ -163,10 +130,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByQueryComposedOfTwoWords() {
 
-    User dog = new User(1l, "Jack Smith");
-
-    entityLoader.store(dog.id, dog);
-    searchEngine.register(dog);
+    store(new User(1l, "Jack Smith"));
 
     List<User> result = searchEngine.search(User.class).where(SearchMatchers.query("Jack Smith")).returnAll().now();
 
@@ -177,10 +141,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByQueryComposedOfOneWord() {
 
-    User dog = new User(1l, "Jack Smith");
-
-    entityLoader.store(dog.id, dog);
-    searchEngine.register(dog);
+    store(new User(1l, "Jack Smith"));
 
     List<User> result = searchEngine.search(User.class).where(SearchMatchers.query("Jack")).returnAll().now();
 
@@ -191,13 +152,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchForManyMatchingTheGivenQuery() {
 
-    User dog = new User(1l, "Jack Smith");
-    User anotherDog = new User(2l, "Johny Smith");
-
-    entityLoader.store(dog.id, dog);
-    entityLoader.store(anotherDog.id, anotherDog);
-    searchEngine.register(dog);
-    searchEngine.register(anotherDog);
+    store(new User(1l, "Jack Smith"), new User(2l, "Johny Smith"));
 
     List<User> result = searchEngine.search(User.class).where(SearchMatchers.query("Smith")).returnAll().now();
 
@@ -209,10 +164,7 @@ public class SearchEngineApiTest {
   @Test(expected = InvalidSearchException.class)
   public void searchByEmptyQuery() {
 
-    User dog = new User(1l, "Jack");
-
-    entityLoader.store(dog.id, dog);
-    searchEngine.register(dog);
+    store(new User(1l, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where(SearchMatchers.query("")).returnAll().now();
 
@@ -222,11 +174,8 @@ public class SearchEngineApiTest {
   @Test
   public void searchInGivenIndex() {
 
-    User user = new User(1l);
-    Employee employee = new Employee(1l, "John");
-
-    entityLoader.store(user.id, user);
-    searchEngine.register(employee);
+    entityLoader.store(1l, new User(1l));
+    searchEngine.register(new Employee(1l, "John"));
 
     List<User> result = searchEngine.search(User.class).inIndex(Employee.class)
                                                        .where("firstName", SearchMatchers.is("John"))
@@ -239,10 +188,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByMatchingTwoFieldValues() {
 
-    Employee employee = new Employee(1l, "John", "Adams");
-
-    entityLoader.store(1l, employee);
-    searchEngine.register(employee);
+    store(new Employee(1l, "John", "Adams"));
 
     List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchMatchers.is("John"))
                                                                .where("lastName", SearchMatchers.is("Adams"))
@@ -256,17 +202,7 @@ public class SearchEngineApiTest {
   @Test
   public void searchByLimitingSearchResult() {
 
-    Employee employee = new Employee(1l, "Jack Smith");
-    Employee employee2 = new Employee(2l, "Jack Samuel");
-    Employee employee3 = new Employee(3l, "Jack Jameson");
-
-    entityLoader.store(employee.id, employee);
-    entityLoader.store(employee2.id, employee2);
-    entityLoader.store(employee3.id, employee3);
-
-    searchEngine.register(employee);
-    searchEngine.register(employee2);
-    searchEngine.register(employee3);
+    store(new Employee(1l, "Jack Smith"), new Employee(2l, "Jack Samuel"), new Employee(3l, "Jack Jameson"));
 
     List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchMatchers.is("Jack"))
                                                                .returnAll()
@@ -279,13 +215,26 @@ public class SearchEngineApiTest {
   @Test(expected = InvalidSearchException.class)
   public void searchWithoutSpecifyingMatcherAndQuery() {
 
-    User dog = new User(1l, "John");
-
-    entityLoader.store(dog.id, dog);
-    searchEngine.register(dog);
+    store(new User(1l, "John"));
 
     List<User> result = searchEngine.search(User.class).returnAll().now();
 
     assertThat(result.size(), is(0));
+  }
+
+  private void store(User... users) {
+
+    for (User user : users) {
+      entityLoader.store(user.id, user);
+      searchEngine.register(user);
+    }
+  }
+
+  private void store(Employee... employees) {
+
+    for (Employee employee : employees) {
+      entityLoader.store(employee.id, employee);
+      searchEngine.register(employee);
+    }
   }
 }

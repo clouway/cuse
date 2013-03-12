@@ -21,10 +21,10 @@ public class Search<T> {
 
   public static final class SearchBuilder<T> {
 
-    private Class clazz;
-    private EntityLoader entityLoader;
-    private IndexingStrategyCatalog indexingStrategyCatalog;
-    private Map<String, SearchMatcher> filters = new HashMap<String, SearchMatcher>();
+    private final Class clazz;
+    private final EntityLoader entityLoader;
+    private final IndexingStrategyCatalog indexingStrategyCatalog;
+    private final Map<String, SearchMatcher> filters = new HashMap<String, SearchMatcher>();
     private String query = "";
     private String index;
 
