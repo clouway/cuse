@@ -53,7 +53,7 @@ public abstract class EntityLoaderContractTest {
   }
 
   @Test
-  public void emptyListIsReturnedWhenLoadingNotStoredEntity() {
+  public void loadingNotStoredEntity() {
 
     store(1l, new Entity(1l));
 
