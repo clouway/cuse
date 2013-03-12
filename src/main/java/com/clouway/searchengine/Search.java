@@ -76,48 +76,18 @@ public class Search<T> {
 
   public List<T> now() {
 
-    StringBuilder queryBuilder = new StringBuilder();
+    String queryFilter = buildQueryFilter();
 
-    for (String filter : filters.keySet()) {
-
-      String filterValue = filters.get(filter).getValue().trim();
-
-      if (Strings.isNullOrEmpty(filterValue)) {
-        throw new EmptyMatcherException();
-      }
-
-      StringBuilder filterBuilder = new StringBuilder();
-      filterBuilder.append(filter).append(":").append(filterValue);
-
-      queryBuilder.append(filterBuilder).append(" ");
-    }
-
-    String searchQuery = this.query + queryBuilder.toString();
-
-    QueryOptions.Builder queryOptionsBuilder = QueryOptions.newBuilder().setReturningIdsOnly(true);
-
-    if (limit > 0) {
-      queryOptionsBuilder.setLimit(limit);
-    }
+    String searchQuery = query + queryFilter;
 
     if (Strings.isNullOrEmpty(searchQuery)) {
       throw new InvalidSearchException();
     }
 
-    Query query = Query.newBuilder().setOptions(queryOptionsBuilder.build()).build(searchQuery);
-
-    String indexName;
-
-    if (index != null && index.length() > 0) {
-      indexName = index;
-    } else {
-      indexName = indexingStrategyCatalog.get(clazz).getIndexName();
-    }
-
     Results<ScoredDocument> results = SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
-                                                                             .setName(indexName)
+                                                                             .setName(buildIndexName())
                                                                              .setConsistency(Consistency.PER_DOCUMENT))
-                                                                             .search(query);
+                                                                             .search(buildQuery(searchQuery));
 
     List<String> entityIds = new ArrayList<String>();
     for (ScoredDocument scoredDoc : results) {
@@ -130,5 +100,54 @@ public class Search<T> {
   public Search<T> limit(int limit) {
     this.limit = limit;
     return this;
+  }
+
+  private String buildIndexName() {
+
+    String indexName;
+
+    if (index != null && index.length() > 0) {
+      indexName = index;
+    } else {
+      indexName = indexingStrategyCatalog.get(clazz).getIndexName();
+    }
+
+    return indexName;
+  }
+
+  private String buildQueryFilter() {
+
+    StringBuilder queryFilter = new StringBuilder();
+
+    for (String filter : filters.keySet()) {
+
+      String filterValue = filters.get(filter).getValue().trim();
+
+      if (Strings.isNullOrEmpty(filterValue)) {
+        throw new EmptyMatcherException();
+      }
+
+      queryFilter.append(filter).append(":").append(filterValue).append(" ");
+    }
+
+    return queryFilter.toString();
+  }
+
+  private QueryOptions buildQueryOptions() {
+
+    QueryOptions.Builder queryOptionsBuilder = QueryOptions.newBuilder().setReturningIdsOnly(true);
+
+    if (limit > 0) {
+      queryOptionsBuilder.setLimit(limit);
+    }
+
+    return queryOptionsBuilder.build();
+  }
+
+  private Query buildQuery(String searchQuery) {
+
+    QueryOptions queryOptions = buildQueryOptions();
+
+    return Query.newBuilder().setOptions(queryOptions).build(searchQuery);
   }
 }
