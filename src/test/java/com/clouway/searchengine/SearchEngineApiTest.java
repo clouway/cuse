@@ -200,16 +200,27 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void searchByLimitingSearchResult() {
+  public void limitingSearchResult() {
 
     store(new Employee(1l, "Jack Smith"), new Employee(2l, "Jack Samuel"), new Employee(3l, "Jack Jameson"));
 
     List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchMatchers.is("Jack"))
-                                                               .returnAll()
-                                                               .limit(2)
+                                                               .fetchMaximum(2)
                                                                .now();
 
     assertThat(result.size(), is(2));
+  }
+
+  @Test(expected = SearchLimitExceededException.class)
+  public void exceededSearchLimit() {
+
+    store(new User(1l, "John"));
+
+    List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.is("John"))
+                                                       .fetchMaximum(1001)
+                                                       .now();
+
+    assertThat(result.size(), is(0));
   }
 
   @Test(expected = InvalidSearchException.class)

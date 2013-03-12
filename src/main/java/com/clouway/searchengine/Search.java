@@ -49,9 +49,17 @@ public class Search<T> {
       return this;
     }
 
+    public Search<T> fetchMaximum(int limit) {
+
+      Search<T> search = returnAll();
+      search.limit = limit;
+
+      return search;
+    }
+
     public Search<T> returnAll() {
 
-      Search<T> search = new Search<T>( );
+      Search<T> search = new Search<T>();
       search.clazz = clazz;
       search.filters = filters;
       search.entityLoader = entityLoader;
@@ -97,11 +105,6 @@ public class Search<T> {
     return entityLoader.loadAll(clazz, entityIds);
   }
 
-  public Search<T> limit(int limit) {
-    this.limit = limit;
-    return this;
-  }
-
   private String buildIndexName() {
 
     String indexName;
@@ -136,6 +139,10 @@ public class Search<T> {
   private QueryOptions buildQueryOptions() {
 
     QueryOptions.Builder queryOptionsBuilder = QueryOptions.newBuilder().setReturningIdsOnly(true);
+
+    if (limit > 1000) {
+      throw new SearchLimitExceededException();
+    }
 
     if (limit > 0) {
       queryOptionsBuilder.setLimit(limit);
