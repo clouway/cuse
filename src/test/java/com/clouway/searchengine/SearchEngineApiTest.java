@@ -91,7 +91,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test() {
+  public void searchByMatchingFieldValue() {
 
     Dog dog = new Dog(1l, "Jack");
 
@@ -105,7 +105,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test2() {
+  public void searchByNotMatchingFieldValue() {
 
     Dog dog = new Dog(1l, "Jack");
 
@@ -118,7 +118,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test3() {
+  public void searchByEmptyFieldValue() {
 
     Dog dog = new Dog(1l, "Jack");
 
@@ -131,7 +131,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test4() {
+  public void searchByNotExistingFieldValue() {
 
     Dog dog = new Dog(1l, "Jack");
 
@@ -144,7 +144,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test5() {
+  public void searchByMatchingAnyOfTheGivenValues() {
 
     Dog dog = new Dog(1l, "Jack");
     Dog anotherDog = new Dog(2l, "Jim");
@@ -162,7 +162,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test6() {
+  public void searchByMatchingOneValueThatMatchesAny() {
 
     Dog dog = new Dog(1l, "Jack");
     Dog anotherDog = new Dog(2l, "Jim");
@@ -179,7 +179,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test7() {
+  public void searchByMatchingAnyValuesForNotExistingField() {
 
     Dog dog = new Dog(1l, "Jack");
     Dog anotherDog = new Dog(2l, "Jim");
@@ -195,7 +195,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test8() {
+  public void searchByQueryComposedOfTwoWords() {
 
     Dog dog = new Dog(1l, "Jack Smith");
 
@@ -209,7 +209,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test9() {
+  public void searchByQueryComposedOfOneWord() {
 
     Dog dog = new Dog(1l, "Jack Smith");
 
@@ -223,7 +223,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test10() {
+  public void searchForManyMatchingTheGivenQuery() {
 
     Dog dog = new Dog(1l, "Jack Smith");
     Dog anotherDog = new Dog(2l, "Johny Smith");
@@ -241,7 +241,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test11() {
+  public void searchByEmptyQuery() {
 
     Dog dog = new Dog(1l, "Jack");
     Dog anotherDog = new Dog(2l, "Jack");
@@ -257,7 +257,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test12() {
+  public void searchInGivenIndex() {
 
     User user = new User(1l);
     Employee employee = new Employee(1l, "John");
@@ -274,7 +274,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test13() {
+  public void searchByMatchingTwoFieldValues() {
 
     Employee employee = new Employee(1l, "John", "Adams");
 
@@ -291,7 +291,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void test14() {
+  public void searchByLimitingSearchResult() {
 
     Employee employee = new Employee(1l, "Jack Smith");
     Employee employee2 = new Employee(2l, "Jack Samuel");
