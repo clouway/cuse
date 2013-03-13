@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static com.clouway.searchengine.SearchMatchers.isAnyOf;
+import static com.clouway.searchengine.SearchMatchers.query;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -99,7 +101,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack"), new User(2l, "Jim"));
 
-    List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.isAnyOf("Jack", "Jim")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where("name", isAnyOf("Jack", "Jim")).returnAll().now();
 
     assertThat(result.size(), is(2));
     assertThat(result.get(0).id, is(1l));
@@ -111,7 +113,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack"), new User(2l, "Jim"));
 
-    List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.isAnyOf("Jim")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where("name", isAnyOf("Jim")).returnAll().now();
 
     assertThat(result.size(), is(1));
     assertThat(result.get(0).id, is(2l));
@@ -122,7 +124,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack"));
 
-    List<User> result = searchEngine.search(User.class).where("age", SearchMatchers.isAnyOf("12", "14")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where("age", isAnyOf("12", "14")).returnAll().now();
 
     assertThat(result.size(), is(0));
   }
@@ -132,7 +134,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack Smith"));
 
-    List<User> result = searchEngine.search(User.class).where(SearchMatchers.query("Jack Smith")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where(query("Jack Smith")).returnAll().now();
 
     assertThat(result.size(), is(1));
     assertThat(result.get(0).id, is(1l));
@@ -143,7 +145,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack Smith"));
 
-    List<User> result = searchEngine.search(User.class).where(SearchMatchers.query("Jack")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where(query("Jack")).returnAll().now();
 
     assertThat(result.size(), is(1));
     assertThat(result.get(0).id, is(1l));
@@ -154,7 +156,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack Smith"), new User(2l, "Johny Smith"));
 
-    List<User> result = searchEngine.search(User.class).where(SearchMatchers.query("Smith")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where(query("Smith")).returnAll().now();
 
     assertThat(result.size(), is(2));
     assertThat(result.get(0).id, is(1l));
@@ -166,7 +168,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack"));
 
-    List<User> result = searchEngine.search(User.class).where(SearchMatchers.query("")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where(query("")).returnAll().now();
 
     assertThat(result.size(), is(0));
   }

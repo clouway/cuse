@@ -65,8 +65,8 @@ public class SearchEngineImpl implements SearchEngine {
     loadIndex(indexName).add(documentBuilder.build());
   }
 
-  public Search.SearchBuilder search(Class clazz) {
-    return new Search.SearchBuilder(clazz, entityLoader, indexingStrategyCatalog);
+  public <T> Search.SearchBuilder<T> search(Class<T> clazz) {
+    return new Search.SearchBuilder<T>(clazz, entityLoader, indexingStrategyCatalog);
   }
 
   private Index loadIndex(String indexName) {
