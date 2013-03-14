@@ -129,7 +129,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void searchByQueryComposedOfTwoWords() {
+  public void searchForOneMatchByGivenQuery() {
 
     store(new User(1l, "Jack Smith"));
 
@@ -140,18 +140,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void searchByQueryComposedOfOneWord() {
-
-    store(new User(1l, "Jack Smith"));
-
-    List<User> result = searchEngine.search(User.class).where(new SearchQuery("Jack")).returnAll().now();
-
-    assertThat(result.size(), is(1));
-    assertThat(result.get(0).id, is(1l));
-  }
-
-  @Test
-  public void searchForManyMatchingTheGivenQuery() {
+  public void searchForManyMatchesByGivenQuery() {
 
     store(new User(1l, "Jack Smith"), new User(2l, "Johny Smith"));
 
