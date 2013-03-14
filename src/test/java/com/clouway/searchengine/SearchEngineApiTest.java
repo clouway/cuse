@@ -52,7 +52,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void searchByMatchingFieldValue() {
+  public void searchMatchingFieldValue() {
 
     store(new User(1l, "Jack"));
 
@@ -63,7 +63,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void searchByNotMatchingFieldValue() {
+  public void noMatchingFieldValue() {
 
     store(new User(1l, "Jack"));
 
@@ -103,7 +103,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void searchByMatchingAnyOfTheGivenValues() {
+  public void matchingAnyOfTheGivenValues() {
 
     store(new User(1l, "Jack"), new User(2l, "Jim"));
 
@@ -126,7 +126,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void searchByMatchingAnyValuesForNotExistingField() {
+  public void matchingValuesForNonExistingField() {
 
     store(new User(1l, "Jack"));
 
@@ -197,7 +197,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void limitingSearchResultByPositiveValue() {
+  public void limitSearchByPositiveValue() {
 
     store(new Employee(1l, "Jack Smith"), new Employee(2l, "Jack Samuel"), new Employee(3l, "Jack Jameson"));
 
@@ -245,7 +245,7 @@ public class SearchEngineApiTest {
   }
 
   @Test(expected = InvalidSearchException.class)
-  public void searchWithoutSpecifyingMatcherAndQuery() {
+  public void searchWithoutMatcher() {
 
     store(new User(1l, "John"));
 
