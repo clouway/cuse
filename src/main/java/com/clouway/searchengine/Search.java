@@ -144,6 +144,10 @@ public class Search<T> {
       throw new SearchLimitExceededException();
     }
 
+    if (limit < 0) {
+      throw new NegativeSearchLimitException();
+    }
+
     if (limit > 0) {
       queryOptionsBuilder.setLimit(limit);
     }

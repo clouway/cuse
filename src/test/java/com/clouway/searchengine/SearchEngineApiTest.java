@@ -190,7 +190,7 @@ public class SearchEngineApiTest {
   }
 
   @Test
-  public void limitingSearchResult() {
+  public void limitingSearchResultByPositiveValue() {
 
     store(new Employee(1l, "Jack Smith"), new Employee(2l, "Jack Samuel"), new Employee(3l, "Jack Jameson"));
 
@@ -199,6 +199,20 @@ public class SearchEngineApiTest {
                                                                .now();
 
     assertThat(result.size(), is(2));
+    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(1).id, is(2l));
+  }
+
+  @Test
+  public void limitingSearchResultByZero() {
+
+    store(new User(1l, "Jack"), new User(2l, "Jack Adams"));
+
+    List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.is("Jack")).fetchMaximum(0).now();
+
+    assertThat(result.size(), is(2));
+    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(1).id, is(2l));
   }
 
   @Test(expected = SearchLimitExceededException.class)
@@ -209,6 +223,16 @@ public class SearchEngineApiTest {
     List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.is("John"))
                                                        .fetchMaximum(1001)
                                                        .now();
+
+    assertThat(result.size(), is(0));
+  }
+
+  @Test(expected = NegativeSearchLimitException.class)
+  public void negativeSearchLimit() {
+
+    store(new User(1l, "John"));
+
+    List<User> result = searchEngine.search(User.class).where("name", SearchMatchers.is("John")).fetchMaximum(-1).now();
 
     assertThat(result.size(), is(0));
   }
