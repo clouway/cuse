@@ -19,10 +19,12 @@ public class SearchEngineImpl implements SearchEngine {
 
   private final EntityLoader entityLoader;
   private final IndexingStrategyCatalog indexingStrategyCatalog;
+  private final IdConvertorCatalog idConvertorCatalog;
 
-  public SearchEngineImpl(EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog) {
+  public SearchEngineImpl(EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConvertorCatalog idConvertorCatalog) {
     this.entityLoader = entityLoader;
     this.indexingStrategyCatalog = indexingStrategyCatalog;
+    this.idConvertorCatalog = idConvertorCatalog;
   }
 
   public void register(Object instance) {
@@ -47,6 +49,11 @@ public class SearchEngineImpl implements SearchEngine {
 
   public <T> Search.SearchBuilder<T> search(Class<T> clazz) {
     return new Search.SearchBuilder<T>(clazz, entityLoader, indexingStrategyCatalog);
+  }
+
+  @Override
+  public <T> Search.SearchBuilder<T> searchIds(Class<T> idClass) {
+    return new Search.SearchBuilder<T>(idClass, idClass, entityLoader, indexingStrategyCatalog, idConvertorCatalog);
   }
 
   private void addDocumentInIndex(String indexName, Document document) {

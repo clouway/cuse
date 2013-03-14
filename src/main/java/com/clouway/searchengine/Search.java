@@ -21,9 +21,13 @@ public class Search<T> {
 
   public static final class SearchBuilder<T> {
 
-    private final Class<T> clazz;
-    private final EntityLoader entityLoader;
-    private final IndexingStrategyCatalog indexingStrategyCatalog;
+    private Class<T> clazz;
+    private Class<T> idClazz;
+
+    private EntityLoader entityLoader;
+    private IndexingStrategyCatalog indexingStrategyCatalog;
+    private IdConvertorCatalog idConvertorCatalog;
+
     private final Map<String, SearchMatcher> filters = new HashMap<String, SearchMatcher>();
     private String query = "";
     private String index;
@@ -32,6 +36,14 @@ public class Search<T> {
       this.clazz = clazz;
       this.entityLoader = entityLoader;
       this.indexingStrategyCatalog = indexingStrategyCatalog;
+    }
+
+    public SearchBuilder(Class<T> clazz, Class<T> idClazz, EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConvertorCatalog idConvertorCatalog) {
+      this.clazz = clazz;
+      this.idClazz = idClazz;
+      this.entityLoader = entityLoader;
+      this.indexingStrategyCatalog = indexingStrategyCatalog;
+      this.idConvertorCatalog = idConvertorCatalog;
     }
 
     public SearchBuilder<T> where(String field, SearchMatcher matcher) {
@@ -60,10 +72,15 @@ public class Search<T> {
     public Search<T> returnAll() {
 
       Search<T> search = new Search<T>();
+
       search.clazz = clazz;
-      search.filters = filters;
+      search.idClazz = idClazz;
+
       search.entityLoader = entityLoader;
       search.indexingStrategyCatalog = indexingStrategyCatalog;
+      search.idConvertorCatalog = idConvertorCatalog;
+
+      search.filters = filters;
       search.query = query;
       search.index = index;
 
@@ -72,9 +89,13 @@ public class Search<T> {
   }
 
   private Class<T> clazz;
-  private Map<String, SearchMatcher> filters;
+  private Class<T> idClazz;
+
   private EntityLoader entityLoader;
   private IndexingStrategyCatalog indexingStrategyCatalog;
+  private IdConvertorCatalog idConvertorCatalog;
+
+  private Map<String, SearchMatcher> filters;
   private String query;
   private String index;
   private int limit;
@@ -100,6 +121,17 @@ public class Search<T> {
     List<String> entityIds = new ArrayList<String>();
     for (ScoredDocument scoredDoc : results) {
       entityIds.add(scoredDoc.getId());
+    }
+
+    if (idClazz != null) {
+
+      IdConvertor convertor = idConvertorCatalog.getConvertor(idClazz);
+
+      if (convertor == null) {
+        throw new NotConfiguredIdConvertorCatalogException();
+      }
+
+      return convertor.convert(entityIds);
     }
 
     return entityLoader.loadAll(clazz, entityIds);

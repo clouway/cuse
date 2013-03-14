@@ -2,8 +2,11 @@ package com.clouway.searchengine;
 
 import com.google.appengine.tools.development.testing.LocalSearchServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import org.jmock.Expectations;
+import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.List;
@@ -18,15 +21,29 @@ import static org.junit.Assert.assertThat;
  */
 public class SearchEngineApiTest {
 
+  @Rule
+  public final JUnitRuleMockery context = new JUnitRuleMockery();
+
   private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalSearchServiceTestConfig());
-  private InMemoryRepository repository;
+
   private SearchEngine searchEngine;
+
+  private InMemoryRepository repository;
+  private EntityLoader entityLoader = context.mock(EntityLoader.class);
+
+  private IndexingStrategyCatalog indexingStrategyCatalog;
+  private IdConvertorCatalog idConvertorCatalog;
 
   @Before
   public void setUp() {
+
     helper.setUp();
+
     repository = new InMemoryRepository();
-    searchEngine = new SearchEngineImpl(repository, new InMemoryIndexingStrategyCatalog());
+    indexingStrategyCatalog = new InMemoryIndexingStrategyCatalog();
+    idConvertorCatalog = new InMemoryIdConvertorCatalog();
+
+    searchEngine = new SearchEngineImpl(repository, indexingStrategyCatalog, idConvertorCatalog);
   }
 
   @After
@@ -245,7 +262,7 @@ public class SearchEngineApiTest {
       public IndexingStrategy get(Class aClass) {
         return null;
       }
-    });
+    }, null);
 
     store(new User(1l, "John"));
 
@@ -274,6 +291,98 @@ public class SearchEngineApiTest {
     assertThat(result.size(), is(2));
     assertThat(result.get(0).name, is("John Adams"));
     assertThat(result.get(1).name, is("John Parker"));
+  }
+
+  @Test
+  public void searchReturnsObjectIdsAsString() {
+
+    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, idConvertorCatalog);
+
+    context.checking(new Expectations() {{
+      never(entityLoader);
+    }});
+
+    store(new User(1l, "John Adams"), new User(2l, "John Parker"));
+
+    List<String> result = searchEngine.searchIds(String.class).inIndex(User.class)
+                                                              .where("name", SearchMatchers.is("John"))
+                                                              .returnAll()
+                                                              .now();
+
+    assertThat(result.size(), is(2));
+    assertThat(result.get(0), is("1"));
+    assertThat(result.get(1), is("2"));
+  }
+
+  @Test
+  public void searchReturnsObjectIdsAsLong() {
+
+    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, idConvertorCatalog);
+
+    context.checking(new Expectations() {{
+      never(entityLoader);
+    }});
+
+    store(new User(1l, "John Adams"), new User(2l, "John Parker"));
+
+    List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
+                                                          .where("name", SearchMatchers.is("John"))
+                                                          .returnAll()
+                                                          .now();
+
+    assertThat(result.size(), is(2));
+    assertThat(result.get(0), is(1l));
+    assertThat(result.get(1), is(2l));
+  }
+
+  @Test(expected = NotConfiguredIdConvertorCatalogException.class)
+  public void notConfiguredIdConvertor() {
+
+    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, new IdConvertorCatalog() {
+
+      public IdConvertor getConvertor(Class aClass) {
+        return null;
+      }
+    });
+
+    context.checking(new Expectations() {{
+      never(entityLoader);
+    }});
+
+    store(new User(1l, "John Adams"));
+
+    List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
+                                                          .where("name", SearchMatchers.is("John"))
+                                                          .returnAll()
+                                                          .now();
+
+    assertThat(result.size(), is(0));
+  }
+
+  @Test(expected = NotConfiguredIdConvertorCatalogException.class)
+  public void missingIdConvertor() {
+
+    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, new IdConvertorCatalog() {
+      @Override
+      public IdConvertor getConvertor(Class aClass) {
+
+        if (aClass.equals(String.class)) {
+          return new StringIdConvertor();
+        }
+
+        return null;
+      }
+    });
+
+    context.checking(new Expectations() {{
+      never(entityLoader);
+    }});
+
+    store(new User(1l, "John"));
+
+    List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class).where("name", SearchMatchers.is("John")).returnAll().now();
+
+    assertThat(result.size(), is(0));
   }
 
   private void store(User... users) {
