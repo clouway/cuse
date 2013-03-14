@@ -128,7 +128,7 @@ public class Search<T> {
       IdConvertor convertor = idConvertorCatalog.getConvertor(idClazz);
 
       if (convertor == null) {
-        throw new NotConfiguredIdConvertorCatalogException();
+        throw new NotConfiguredIdConvertorException();
       }
 
       return convertor.convert(entityIds);

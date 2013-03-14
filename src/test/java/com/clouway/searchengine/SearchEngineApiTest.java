@@ -335,7 +335,7 @@ public class SearchEngineApiTest {
     assertThat(result.get(1), is(2l));
   }
 
-  @Test(expected = NotConfiguredIdConvertorCatalogException.class)
+  @Test(expected = NotConfiguredIdConvertorException.class)
   public void notConfiguredIdConvertor() {
 
     searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, new IdConvertorCatalog() {
@@ -359,7 +359,7 @@ public class SearchEngineApiTest {
     assertThat(result.size(), is(0));
   }
 
-  @Test(expected = NotConfiguredIdConvertorCatalogException.class)
+  @Test(expected = NotConfiguredIdConvertorException.class)
   public void missingIdConvertor() {
 
     searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, new IdConvertorCatalog() {

@@ -3,5 +3,5 @@ package com.clouway.searchengine;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class NotConfiguredIdConvertorCatalogException extends RuntimeException {
+public class NotConfiguredIdConvertorException extends RuntimeException {
 }
