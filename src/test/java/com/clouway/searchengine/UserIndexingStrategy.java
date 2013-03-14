@@ -1,8 +1,5 @@
 package com.clouway.searchengine;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
@@ -13,12 +10,12 @@ public class UserIndexingStrategy implements IndexingStrategy<User> {
   }
 
   @Override
-  public List<String> getFields() {
-    return Arrays.asList("name");
+  public String getId(User user) {
+    return user.id.toString();
   }
 
   @Override
-  public String getId(User user) {
-    return user.id.toString();
+  public IndexingSchema getIndexingSchema() {
+    return IndexingSchema.aNewIndexingSchema().fullTextFields("name").build();
   }
 }

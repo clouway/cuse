@@ -39,8 +39,8 @@ public class Search<T> {
       return this;
     }
 
-    public SearchBuilder<T> where(SearchMatcher matcher) {
-      this.query = matcher.getValue();
+    public SearchBuilder<T> where(SearchQuery query) {
+      this.query = query.getValue();
       return this;
     }
 

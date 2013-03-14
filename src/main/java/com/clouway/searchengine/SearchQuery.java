@@ -3,15 +3,14 @@ package com.clouway.searchengine;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class QuerySearchMatcher implements SearchMatcher {
+public class SearchQuery {
 
-  private final String query;
+  private String query;
 
-  public QuerySearchMatcher(String query) {
+  public SearchQuery(String query) {
     this.query = query;
   }
 
-  @Override
   public String getValue() {
     return query;
   }
