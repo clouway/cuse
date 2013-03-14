@@ -26,17 +26,7 @@ public class SearchEngineApiTest {
   public void setUp() {
     helper.setUp();
     repository = new InMemoryRepository();
-
-    searchEngine = new SearchEngineImpl(repository, new IndexingStrategyCatalog() {
-      @Override
-      public IndexingStrategy get(Class aClass) {
-
-        if (aClass.equals(Employee.class)) {
-          return new EmployeeIndexingStrategy();
-        }
-        return new UserIndexingStrategy();
-      }
-    });
+    searchEngine = new SearchEngineImpl(repository, new InMemoryIndexingStrategyCatalog());
   }
 
   @After
