@@ -254,7 +254,7 @@ public class SearchEngineApiTest {
     assertThat(result.size(), is(0));
   }
 
-  @Test(expected = InvalidIndexingStrategyException.class)
+  @Test(expected = NotConfiguredIndexingStrategyException.class)
   public void notConfiguredIndexingStrategy() {
 
     searchEngine = new SearchEngineImpl(repository, new IndexingStrategyCatalog() {
@@ -380,7 +380,26 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "John"));
 
-    List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class).where("name", SearchMatchers.is("John")).returnAll().now();
+    List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
+                                                          .where("name", SearchMatchers.is("John"))
+                                                          .returnAll()
+                                                          .now();
+
+    assertThat(result.size(), is(0));
+  }
+
+  @Test(expected = NotConfiguredIndexingStrategyException.class)
+  public void searchForObjectIdsWithoutGivenIndex() {
+
+    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, idConvertorCatalog);
+
+    context.checking(new Expectations() {{
+      never(entityLoader);
+    }});
+
+    store(new User(1l, "John"));
+
+    List<Long> result = searchEngine.searchIds(Long.class).where("name", SearchMatchers.is("John")).returnAll().now();
 
     assertThat(result.size(), is(0));
   }

@@ -33,7 +33,7 @@ public class SearchEngineImpl implements SearchEngine {
     IndexingStrategy strategy = indexingStrategyCatalog.get(instanceClass);
 
     if (strategy == null) {
-      throw new InvalidIndexingStrategyException();
+      throw new NotConfiguredIndexingStrategyException();
     }
 
     String documentId = strategy.getId(instance);

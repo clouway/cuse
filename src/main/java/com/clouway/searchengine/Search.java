@@ -144,6 +144,11 @@ public class Search<T> {
     if (index != null && index.length() > 0) {
       indexName = index;
     } else {
+
+      if (indexingStrategyCatalog.get(clazz) == null) {
+        throw new NotConfiguredIndexingStrategyException();
+      }
+
       indexName = indexingStrategyCatalog.get(clazz).getIndexName();
     }
 
