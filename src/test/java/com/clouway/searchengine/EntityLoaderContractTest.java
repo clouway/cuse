@@ -1,5 +1,6 @@
 package com.clouway.searchengine;
 
+import com.clouway.searchengine.spi.EntityLoader;
 import org.junit.Test;
 
 import java.util.ArrayList;

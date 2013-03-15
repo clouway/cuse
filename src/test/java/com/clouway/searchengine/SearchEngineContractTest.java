@@ -1,5 +1,6 @@
 package com.clouway.searchengine;
 
+import com.clouway.searchengine.spi.*;
 import com.google.appengine.tools.development.testing.LocalSearchServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.jmock.Expectations;
@@ -11,7 +12,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static com.clouway.searchengine.SearchMatchers.isAnyOf;
+import static com.clouway.searchengine.spi.SearchMatchers.isAnyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -19,7 +20,7 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
-public class SearchEngineApiTest {
+public abstract class SearchEngineContractTest {
 
   @Rule
   public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -33,6 +34,13 @@ public class SearchEngineApiTest {
 
   private IndexingStrategyCatalog indexingStrategyCatalog;
   private IdConvertorCatalog idConvertorCatalog;
+  private IndexRegister indexRegister = createIndexRegister();
+
+  private MatchedIdObjectFinder objectIdFinder = createObjectIdFinder();
+
+  public abstract IndexRegister createIndexRegister();
+
+  public abstract MatchedIdObjectFinder createObjectIdFinder();
 
   @Before
   public void setUp() {
@@ -43,7 +51,8 @@ public class SearchEngineApiTest {
     indexingStrategyCatalog = new InMemoryIndexingStrategyCatalog();
     idConvertorCatalog = new InMemoryIdConvertorCatalog();
 
-    searchEngine = new SearchEngineImpl(repository, indexingStrategyCatalog, idConvertorCatalog);
+
+    searchEngine = new SearchEngineImpl(repository, indexingStrategyCatalog, idConvertorCatalog, indexRegister, objectIdFinder);
   }
 
   @After
@@ -140,7 +149,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack Smith"));
 
-    List<User> result = searchEngine.search(User.class).where(new SearchQuery("Jack Smith")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where("Jack Smith").returnAll().now();
 
     assertThat(result.size(), is(1));
     assertThat(result.get(0).id, is(1l));
@@ -151,7 +160,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack Smith"), new User(2l, "Johny Smith"));
 
-    List<User> result = searchEngine.search(User.class).where(new SearchQuery("Smith")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where("Smith").returnAll().now();
 
     assertThat(result.size(), is(2));
     assertThat(result.get(0).id, is(1l));
@@ -163,7 +172,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "Jack"));
 
-    List<User> result = searchEngine.search(User.class).where(new SearchQuery("")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where("").returnAll().now();
 
     assertThat(result.size(), is(0));
   }
@@ -262,7 +271,7 @@ public class SearchEngineApiTest {
       public IndexingStrategy get(Class aClass) {
         return null;
       }
-    }, null);
+    }, null,null, objectIdFinder);
 
     store(new User(1l, "John"));
 
@@ -276,7 +285,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "John Adams"));
 
-    List<User> result = searchEngine.search(User.class).where(new SearchQuery("Jack")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where("Jack").returnAll().now();
 
     assertThat(result.size(), is(0));
   }
@@ -286,7 +295,7 @@ public class SearchEngineApiTest {
 
     store(new User(1l, "John Adams"), new User(2l, "John Parker"));
 
-    List<User> result = searchEngine.search(User.class).where(new SearchQuery("Jo")).returnAll().now();
+    List<User> result = searchEngine.search(User.class).where("Jo").returnAll().now();
 
     assertThat(result.size(), is(2));
     assertThat(result.get(0).name, is("John Adams"));
@@ -295,8 +304,6 @@ public class SearchEngineApiTest {
 
   @Test
   public void searchReturnsObjectIdsAsString() {
-
-    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, idConvertorCatalog);
 
     context.checking(new Expectations() {{
       never(entityLoader);
@@ -316,8 +323,6 @@ public class SearchEngineApiTest {
 
   @Test
   public void searchReturnsObjectIdsAsLong() {
-
-    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, idConvertorCatalog);
 
     context.checking(new Expectations() {{
       never(entityLoader);
@@ -343,7 +348,7 @@ public class SearchEngineApiTest {
       public IdConvertor getConvertor(Class aClass) {
         return null;
       }
-    });
+    }, indexRegister, objectIdFinder);
 
     context.checking(new Expectations() {{
       never(entityLoader);
@@ -372,7 +377,7 @@ public class SearchEngineApiTest {
 
         return null;
       }
-    });
+    }, indexRegister, objectIdFinder);
 
     context.checking(new Expectations() {{
       never(entityLoader);
@@ -390,8 +395,6 @@ public class SearchEngineApiTest {
 
   @Test(expected = NotConfiguredIndexingStrategyException.class)
   public void searchForObjectIdsWithoutGivenIndex() {
-
-    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, idConvertorCatalog);
 
     context.checking(new Expectations() {{
       never(entityLoader);

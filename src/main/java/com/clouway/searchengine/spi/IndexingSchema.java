@@ -1,4 +1,4 @@
-package com.clouway.searchengine;
+package com.clouway.searchengine.spi;
 
 import java.util.ArrayList;
 import java.util.Collections;

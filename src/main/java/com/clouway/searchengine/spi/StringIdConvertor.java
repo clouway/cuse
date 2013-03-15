@@ -1,4 +1,6 @@
-package com.clouway.searchengine;
+package com.clouway.searchengine.spi;
+
+import com.clouway.searchengine.spi.IdConvertor;
 
 import java.util.ArrayList;
 import java.util.List;

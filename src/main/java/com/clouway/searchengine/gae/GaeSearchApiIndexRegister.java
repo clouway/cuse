@@ -1,5 +1,9 @@
-package com.clouway.searchengine;
+package com.clouway.searchengine.gae;
 
+import com.clouway.searchengine.spi.IndexRegister;
+import com.clouway.searchengine.spi.IndexWriter;
+import com.clouway.searchengine.spi.IndexingSchema;
+import com.clouway.searchengine.spi.IndexingStrategy;
 import com.google.appengine.api.search.Consistency;
 import com.google.appengine.api.search.Document;
 import com.google.appengine.api.search.Field;
@@ -15,27 +19,9 @@ import java.util.Set;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class SearchEngineImpl implements SearchEngine {
-
-  private final EntityLoader entityLoader;
-  private final IndexingStrategyCatalog indexingStrategyCatalog;
-  private final IdConvertorCatalog idConvertorCatalog;
-
-  public SearchEngineImpl(EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConvertorCatalog idConvertorCatalog) {
-    this.entityLoader = entityLoader;
-    this.indexingStrategyCatalog = indexingStrategyCatalog;
-    this.idConvertorCatalog = idConvertorCatalog;
-  }
-
-  public void register(Object instance) {
-
-    Class instanceClass = instance.getClass();
-    IndexingStrategy strategy = indexingStrategyCatalog.get(instanceClass);
-
-    if (strategy == null) {
-      throw new NotConfiguredIndexingStrategyException();
-    }
-
+public class GaeSearchApiIndexRegister implements IndexRegister {
+  @Override
+  public void register(Object instance, IndexingStrategy strategy) {
     String documentId = strategy.getId(instance);
 
     IndexingSchema indexingSchema = strategy.getIndexingSchema();
@@ -47,14 +33,7 @@ public class SearchEngineImpl implements SearchEngine {
     addDocumentInIndex(strategy.getIndexName(), document);
   }
 
-  public <T> Search.SearchBuilder<T> search(Class<T> clazz) {
-    return new Search.SearchBuilder<T>(clazz, entityLoader, indexingStrategyCatalog);
-  }
 
-  @Override
-  public <T> Search.SearchBuilder<T> searchIds(Class<T> idClass) {
-    return new Search.SearchBuilder<T>(idClass, idClass, entityLoader, indexingStrategyCatalog, idConvertorCatalog);
-  }
 
   private void addDocumentInIndex(String indexName, Document document) {
     loadIndex(indexName).add(document);
@@ -62,8 +41,8 @@ public class SearchEngineImpl implements SearchEngine {
 
   private Index loadIndex(String indexName) {
     return SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
-                                                  .setName(indexName)
-                                                  .setConsistency(Consistency.PER_DOCUMENT));
+            .setName(indexName)
+            .setConsistency(Consistency.PER_DOCUMENT));
   }
 
   private Document buildDocument(Object instance, String documentId, List<String> fields, List<String> fullTextFields) {

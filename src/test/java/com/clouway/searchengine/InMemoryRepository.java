@@ -1,5 +1,7 @@
 package com.clouway.searchengine;
 
+import com.clouway.searchengine.spi.EntityLoader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

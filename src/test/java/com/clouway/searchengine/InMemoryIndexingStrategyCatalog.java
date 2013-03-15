@@ -1,5 +1,8 @@
 package com.clouway.searchengine;
 
+import com.clouway.searchengine.spi.IndexingStrategy;
+import com.clouway.searchengine.spi.IndexingStrategyCatalog;
+
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */

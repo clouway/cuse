@@ -1,5 +1,10 @@
 package com.clouway.searchengine;
 
+import com.clouway.searchengine.spi.IdConvertor;
+import com.clouway.searchengine.spi.IdConvertorCatalog;
+import com.clouway.searchengine.spi.LongIdConvertor;
+import com.clouway.searchengine.spi.StringIdConvertor;
+
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
