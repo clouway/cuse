@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>com.clouway</groupId>
-  <artifactId>searchengine</artifactId>
+  <artifactId>cuse</artifactId>
   <packaging>jar</packaging>
-  <version>1.0</version>
+  <version>0.1</version>
   
-  <name>searchengine</name>
+  <name>cuse</name>
   <url>http://maven.apache.org</url>
   
   <dependencies>
@@ -42,8 +42,13 @@
       <version>1.7.0</version>
     </dependency>
     <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>3.0</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-servlet</artifactId>
+      <artifactId>guice-multibindings</artifactId>
       <version>3.0</version>
     </dependency>
   </dependencies>

@@ -5,5 +5,5 @@ package com.clouway.cuse.spi;
  */
 public interface IndexingStrategyCatalog {
 
-  IndexingStrategy get(Class aClass);
+  IndexingStrategy get(Class<?> indexClazz);
 }

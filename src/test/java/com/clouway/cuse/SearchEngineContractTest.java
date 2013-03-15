@@ -30,30 +30,35 @@ public abstract class SearchEngineContractTest {
   private SearchEngine searchEngine;
 
   private InMemoryRepository repository;
+
   private EntityLoader entityLoader = context.mock(EntityLoader.class);
 
   private IndexingStrategyCatalog indexingStrategyCatalog;
   private IdConvertorCatalog idConvertorCatalog;
-  private IndexRegister indexRegister = createIndexRegister();
 
-  private MatchedIdObjectFinder objectIdFinder = createObjectIdFinder();
+  private IndexRegister indexRegister = context.mock(IndexRegister.class);
 
-  public abstract IndexRegister createIndexRegister();
+  private MatchedIdObjectFinder objectIdFinder = context.mock(MatchedIdObjectFinder.class);
 
-  public abstract MatchedIdObjectFinder createObjectIdFinder();
+
+  protected abstract SearchEngine createSearchEngine();
+
+  protected abstract InMemoryRepository createInMemoryRepository();
+
 
   @Before
   public void setUp() {
 
     helper.setUp();
 
-    repository = new InMemoryRepository();
     indexingStrategyCatalog = new InMemoryIndexingStrategyCatalog();
-    idConvertorCatalog = new InMemoryIdConvertorCatalog();
+    idConvertorCatalog = new DefaultIdConvertorCatalog();
 
-
-    searchEngine = new SearchEngineImpl(repository, indexingStrategyCatalog, idConvertorCatalog, indexRegister, objectIdFinder);
+    repository = createInMemoryRepository();
+    searchEngine = createSearchEngine();
   }
+
+
 
   @After
   public void tearDown() {
@@ -351,6 +356,8 @@ public abstract class SearchEngineContractTest {
     }, indexRegister, objectIdFinder);
 
     context.checking(new Expectations() {{
+      oneOf(indexRegister).register(with(any(Object.class)), with(any(IndexingStrategy.class)));
+      never(objectIdFinder);
       never(entityLoader);
     }});
 
@@ -380,6 +387,8 @@ public abstract class SearchEngineContractTest {
     }, indexRegister, objectIdFinder);
 
     context.checking(new Expectations() {{
+      oneOf(indexRegister).register(with(any(Object.class)), with(any(IndexingStrategy.class)));
+      never(objectIdFinder);
       never(entityLoader);
     }});
 

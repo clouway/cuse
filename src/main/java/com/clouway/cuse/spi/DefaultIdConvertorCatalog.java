@@ -1,14 +1,9 @@
-package com.clouway.cuse;
-
-import com.clouway.cuse.spi.IdConvertor;
-import com.clouway.cuse.spi.IdConvertorCatalog;
-import com.clouway.cuse.spi.LongIdConvertor;
-import com.clouway.cuse.spi.StringIdConvertor;
+package com.clouway.cuse.spi;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class InMemoryIdConvertorCatalog implements IdConvertorCatalog {
+public class DefaultIdConvertorCatalog implements IdConvertorCatalog {
 
   public IdConvertor getConvertor(Class aClass) {
 
