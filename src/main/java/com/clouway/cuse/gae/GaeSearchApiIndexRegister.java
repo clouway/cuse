@@ -51,6 +51,9 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
 
     Map<String, String> documentFields = new HashMap<String, String>();
     for (java.lang.reflect.Field field : instance.getClass().getDeclaredFields()) {
+
+      field.setAccessible(true);
+
       if (fields.contains(field.getName())) {
         String fieldValue = getFieldValue(instance, field);
         documentFields.put(field.getName(), fieldValue);

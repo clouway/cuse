@@ -416,6 +416,16 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(0));
   }
 
+  @Test
+  public void matchingBooleanFieldValues() {
+
+    store(new Employee(1l, true));
+
+    List<Employee> result = searchEngine.search(Employee.class).where("assigned", SearchMatchers.is(true)).returnAll().now();
+
+    assertThat(result.get(0).assigned, is(true));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {

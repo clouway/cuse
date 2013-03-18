@@ -20,7 +20,7 @@ public class EmployeeIndexingStrategy implements IndexingStrategy<Employee> {
 
   @Override
   public IndexingSchema getIndexingSchema() {
-    return new IndexingSchema.IndexingSchemaBuilder().fields("firstName")
+    return new IndexingSchema.IndexingSchemaBuilder().fields("firstName", "assigned")
                                                      .fullTextFields("lastName")
                                                      .build();
   }

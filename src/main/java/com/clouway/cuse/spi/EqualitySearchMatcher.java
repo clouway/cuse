@@ -11,6 +11,10 @@ public class EqualitySearchMatcher implements SearchMatcher {
     this.value = value;
   }
 
+  public EqualitySearchMatcher(Boolean value) {
+    this.value = String.valueOf(value);
+  }
+
   public String getValue() {
     return value;
   }

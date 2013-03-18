@@ -8,6 +8,7 @@ public class Employee {
   public Long id;
   public String firstName;
   public String lastName;
+  public boolean assigned;
 
   public Employee(Long id, String firstName) {
     this.id = id;
@@ -18,5 +19,10 @@ public class Employee {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
+  }
+
+  public Employee(Long id, boolean assigned) {
+    this.id = id;
+    this.assigned = assigned;
   }
 }

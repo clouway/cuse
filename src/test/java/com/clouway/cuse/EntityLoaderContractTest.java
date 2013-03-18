@@ -68,13 +68,4 @@ public abstract class EntityLoaderContractTest {
   public abstract EntityLoader createEntityLoader();
 
   public abstract void store(Long id, Object object);
-
-  class Entity {
-
-    final Long id;
-
-    public Entity(Long id) {
-      this.id = id;
-    }
-  }
 }
