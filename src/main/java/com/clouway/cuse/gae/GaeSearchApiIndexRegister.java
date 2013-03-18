@@ -52,8 +52,6 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
     Map<String, String> documentFields = new HashMap<String, String>();
     for (java.lang.reflect.Field field : instance.getClass().getDeclaredFields()) {
 
-      field.setAccessible(true);
-
       if (fields.contains(field.getName())) {
         String fieldValue = getFieldValue(instance, field);
         documentFields.put(field.getName(), fieldValue);
@@ -80,7 +78,11 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
     String fieldValue = "";
 
     try {
-      fieldValue = String.valueOf(instance.getClass().getField(field.getName()).get(instance));
+
+      java.lang.reflect.Field declaredField = instance.getClass().getDeclaredField(field.getName());
+      declaredField.setAccessible(true);
+      fieldValue = String.valueOf(declaredField.get(instance));
+
     } catch (IllegalAccessException e) {
       e.printStackTrace();
     } catch (NoSuchFieldException e) {

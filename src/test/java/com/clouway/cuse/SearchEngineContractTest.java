@@ -34,17 +34,14 @@ public abstract class SearchEngineContractTest {
   private EntityLoader entityLoader = context.mock(EntityLoader.class);
 
   private IndexingStrategyCatalog indexingStrategyCatalog;
-  private IdConvertorCatalog idConvertorCatalog;
 
   private IndexRegister indexRegister = context.mock(IndexRegister.class);
 
   private MatchedIdObjectFinder objectIdFinder = context.mock(MatchedIdObjectFinder.class);
 
-
   protected abstract SearchEngine createSearchEngine();
 
   protected abstract InMemoryRepository createInMemoryRepository();
-
 
   @Before
   public void setUp() {
@@ -52,13 +49,10 @@ public abstract class SearchEngineContractTest {
     helper.setUp();
 
     indexingStrategyCatalog = new InMemoryIndexingStrategyCatalog();
-    idConvertorCatalog = new DefaultIdConvertorCatalog();
 
     repository = createInMemoryRepository();
     searchEngine = createSearchEngine();
   }
-
-
 
   @After
   public void tearDown() {
@@ -424,6 +418,16 @@ public abstract class SearchEngineContractTest {
     List<Employee> result = searchEngine.search(Employee.class).where("assigned", SearchMatchers.is(true)).returnAll().now();
 
     assertThat(result.get(0).assigned, is(true));
+  }
+
+  @Test
+  public void matchingPrivateFieldValue() {
+
+    store(new User(1l, "John", "Adams"));
+
+    List<User> result = searchEngine.search(User.class).where("family", SearchMatchers.is("Adams")).returnAll().now();
+
+    assertThat(result.get(0).id, is(1l));
   }
 
   private void store(User... users) {

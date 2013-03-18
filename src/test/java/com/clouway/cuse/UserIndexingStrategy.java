@@ -19,6 +19,6 @@ public class UserIndexingStrategy implements IndexingStrategy<User> {
 
   @Override
   public IndexingSchema getIndexingSchema() {
-    return IndexingSchema.aNewIndexingSchema().fullTextFields("name").build();
+    return IndexingSchema.aNewIndexingSchema().fields("family").fullTextFields("name").build();
   }
 }
