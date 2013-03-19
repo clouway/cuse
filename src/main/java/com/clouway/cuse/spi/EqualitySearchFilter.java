@@ -3,15 +3,15 @@ package com.clouway.cuse.spi;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class EqualitySearchMatcher implements SearchMatcher {
+public class EqualitySearchFilter implements SearchFilter {
 
   private final String value;
 
-  public EqualitySearchMatcher(String value) {
+  public EqualitySearchFilter(String value) {
     this.value = value;
   }
 
-  public EqualitySearchMatcher(Boolean value) {
+  public EqualitySearchFilter(Boolean value) {
     this.value = String.valueOf(value);
   }
 

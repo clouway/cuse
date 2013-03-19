@@ -19,7 +19,7 @@ public class Search<T> {
     private IdConvertorCatalog idConvertorCatalog;
     private final MatchedIdObjectFinder objectIdFinder;
 
-    private final Map<String, SearchMatcher> filters = new HashMap<String, SearchMatcher>();
+    private final Map<String, SearchFilter> filters = new HashMap<String, SearchFilter>();
     private String index;
 
     public SearchBuilder(Class<T> clazz, EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, MatchedIdObjectFinder objectIdFinder) {
@@ -39,7 +39,7 @@ public class Search<T> {
       this.objectIdFinder = objectIdFinder;
     }
 
-    public SearchBuilder<T> where(String field, SearchMatcher matcher) {
+    public SearchBuilder<T> where(String field, SearchFilter matcher) {
       filters.put(field, matcher);
       return this;
     }
@@ -47,9 +47,9 @@ public class Search<T> {
     public SearchBuilder<T> where(final String query) {
 
       if (query == null || "".equals(query)) {
-        throw new InvalidSearchException();
+        throw new EmptySearchQueryException();
       }
-      filters.put("", new SearchMatcher() {
+      filters.put("", new SearchFilter() {
         @Override
         public String getValue() {
           return query;
@@ -99,7 +99,7 @@ public class Search<T> {
   private IndexingStrategyCatalog indexingStrategyCatalog;
   private IdConvertorCatalog idConvertorCatalog;
 
-  private Map<String, SearchMatcher> filters;
+  private Map<String, SearchFilter> filters;
   private String index;
   private int limit;
 
@@ -111,7 +111,7 @@ public class Search<T> {
   public List<T> now() {
 
     if (filters == null || filters.size() == 0) {
-      throw new InvalidSearchException();
+      throw new MissingSearchFiltersException();
     }
 
     List<String> results = objectIdFinder.find(buildIndexName(index), filters, limit);

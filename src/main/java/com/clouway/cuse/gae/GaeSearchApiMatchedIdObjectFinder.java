@@ -3,9 +3,8 @@ package com.clouway.cuse.gae;
 import com.clouway.cuse.spi.EmptyMatcherException;
 import com.clouway.cuse.spi.MatchedIdObjectFinder;
 import com.clouway.cuse.spi.NegativeSearchLimitException;
+import com.clouway.cuse.spi.SearchFilter;
 import com.clouway.cuse.spi.SearchLimitExceededException;
-import com.clouway.cuse.spi.SearchMatcher;
-import com.google.appengine.api.search.Consistency;
 import com.google.appengine.api.search.IndexSpec;
 import com.google.appengine.api.search.Query;
 import com.google.appengine.api.search.QueryOptions;
@@ -23,13 +22,12 @@ import java.util.Map;
 public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder {
 
   @Override
-  public List<String> find(String indexName, Map<String, SearchMatcher> filters, int limit) {
+  public List<String> find(String indexName, Map<String, SearchFilter> filters, int limit) {
 
     String query = buildQueryFilter(filters);
 
         Results<ScoredDocument> results = SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
-                                                                             .setName(indexName)
-                                                                             .setConsistency(Consistency.PER_DOCUMENT))
+                                                                             .setName(indexName))
                                                                              .search(buildQuery(query, limit));
 
     List<String> entityIds = new ArrayList<String>();
@@ -43,7 +41,7 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
 
 
 
-  private String buildQueryFilter(Map<String, SearchMatcher> filters) {
+  private String buildQueryFilter(Map<String, SearchFilter> filters) {
 
     StringBuilder queryFilter = new StringBuilder();
 

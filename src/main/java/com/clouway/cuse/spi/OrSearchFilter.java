@@ -7,15 +7,15 @@ import java.util.List;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class OrSearchMatcher implements SearchMatcher {
+public class OrSearchFilter implements SearchFilter {
 
   private List<String> listOfValues = new ArrayList<String>();
 
-  public OrSearchMatcher(String... values) {
+  public OrSearchFilter(String... values) {
     Collections.addAll(listOfValues, values);
   }
 
-  public OrSearchMatcher(List<Long> values) {
+  public OrSearchFilter(List<Long> values) {
 
     for (Long value : values) {
       listOfValues.add(String.valueOf(value));
