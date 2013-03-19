@@ -24,22 +24,22 @@
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-1.0-sdk</artifactId>
-      <version>1.7.0</version>
+      <version>1.7.5</version>
     </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-labs</artifactId>
-      <version>1.7.0</version>
+      <version>1.7.5</version>
     </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-stubs</artifactId>
-      <version>1.7.0</version>
+      <version>1.7.5</version>
     </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-testing</artifactId>
-      <version>1.7.0</version>
+      <version>1.7.5</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
@@ -53,9 +53,10 @@
     </dependency>
   </dependencies>
 
-  <!-- Build Test Jar -->
   <build>
     <plugins>
+
+      <!-- Plugin for building test jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -69,6 +70,7 @@
         </executions>
       </plugin>
 
+      <!-- Plugin for building sources jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
@@ -81,11 +83,7 @@
           </execution>
         </executions>
       </plugin>
-
-
     </plugins>
   </build>
-
-
 
 </project>

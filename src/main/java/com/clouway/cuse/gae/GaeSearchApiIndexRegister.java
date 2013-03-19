@@ -4,7 +4,6 @@ import com.clouway.cuse.spi.IndexRegister;
 import com.clouway.cuse.spi.IndexWriter;
 import com.clouway.cuse.spi.IndexingSchema;
 import com.clouway.cuse.spi.IndexingStrategy;
-import com.google.appengine.api.search.Consistency;
 import com.google.appengine.api.search.Document;
 import com.google.appengine.api.search.Field;
 import com.google.appengine.api.search.Index;
@@ -36,13 +35,12 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
 
 
   private void addDocumentInIndex(String indexName, Document document) {
-    loadIndex(indexName).add(document);
+    loadIndex(indexName).put(document);
   }
 
   private Index loadIndex(String indexName) {
     return SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
-            .setName(indexName)
-            .setConsistency(Consistency.PER_DOCUMENT));
+            .setName(indexName));
   }
 
   private Document buildDocument(Object instance, String documentId, List<String> fields, List<String> fullTextFields) {
