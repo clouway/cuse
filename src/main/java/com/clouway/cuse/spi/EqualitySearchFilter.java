@@ -11,10 +11,6 @@ public class EqualitySearchFilter implements SearchFilter {
     this.value = value;
   }
 
-  public EqualitySearchFilter(Boolean value) {
-    this.value = String.valueOf(value);
-  }
-
   public String getValue() {
     return value;
   }

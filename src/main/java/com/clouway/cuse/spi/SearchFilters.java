@@ -12,7 +12,15 @@ public class SearchFilters {
   }
 
   public static SearchFilter is(Boolean value) {
-    return new EqualitySearchFilter(value);
+    return new EqualitySearchFilter(String.valueOf(value));
+  }
+
+  public static SearchFilter is(Integer value) {
+    return new EqualitySearchFilter(String.valueOf(value));
+  }
+
+  public static SearchFilter is(Long value) {
+    return new EqualitySearchFilter(String.valueOf(value));
   }
 
   public static SearchFilter isAnyOf(String... values) {
