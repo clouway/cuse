@@ -8,5 +8,5 @@ import java.util.Map;
  */
 public interface MatchedIdObjectFinder {
 
-  List<String> find(String indexName, Map<String, SearchFilter> filters, int limit);
+  List<String> find(String indexName, Map<String, SearchFilter> filters, int limit, int offset);
 }

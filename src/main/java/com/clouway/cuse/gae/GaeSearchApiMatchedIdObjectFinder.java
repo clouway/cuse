@@ -22,13 +22,13 @@ import java.util.Map;
 public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder {
 
   @Override
-  public List<String> find(String indexName, Map<String, SearchFilter> filters, int limit) {
+  public List<String> find(String indexName, Map<String, SearchFilter> filters, int limit, int offset) {
 
     String query = buildQueryFilter(filters);
 
         Results<ScoredDocument> results = SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
                                                                              .setName(indexName))
-                                                                             .search(buildQuery(query, limit));
+                                                                             .search(buildQuery(query, limit, offset));
 
     List<String> entityIds = new ArrayList<String>();
     for (ScoredDocument scoredDoc : results) {
@@ -64,14 +64,14 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
     return queryFilter.toString();
   }
 
-  private Query buildQuery(String searchQuery, int limit) {
+  private Query buildQuery(String searchQuery, int limit, int offset) {
 
-    QueryOptions queryOptions = buildQueryOptions(limit);
+    QueryOptions queryOptions = buildQueryOptions(limit, offset);
 
     return Query.newBuilder().setOptions(queryOptions).build(searchQuery);
   }
 
-  private QueryOptions buildQueryOptions(int limit) {
+  private QueryOptions buildQueryOptions(int limit, int offset) {
 
     QueryOptions.Builder queryOptionsBuilder = QueryOptions.newBuilder().setReturningIdsOnly(true);
 
@@ -86,6 +86,8 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
     if (limit > 0) {
       queryOptionsBuilder.setLimit(limit);
     }
+
+    queryOptionsBuilder.setOffset(offset);
 
     return queryOptionsBuilder.build();
   }

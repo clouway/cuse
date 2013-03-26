@@ -430,6 +430,20 @@ public abstract class SearchEngineContractTest {
     assertThat(result.get(0).id, is(1l));
   }
 
+  @Test
+  public void searchByOffset() {
+
+    store(new User(1l, "Jack"));
+    store(new User(2l, "Jack Briton"));
+    store(new User(3l, "Jack Milar"));
+
+    List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("Jack")).offset(1).returnAll().now();
+
+    assertThat(result.size(), is(2));
+    assertThat(result.get(0).name, is("Jack Briton"));
+    assertThat(result.get(1).name, is("Jack Milar"));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {

@@ -21,6 +21,7 @@ public class Search<T> {
 
     private final Map<String, SearchFilter> filters = new HashMap<String, SearchFilter>();
     private String index;
+    private int offset;
 
     public SearchBuilder(Class<T> clazz, EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, MatchedIdObjectFinder objectIdFinder) {
       this.clazz = clazz;
@@ -46,7 +47,7 @@ public class Search<T> {
 
     public SearchBuilder<T> where(final String query) {
 
-      if (query == null || "".equals(query)) {
+      if (query == null || "".equals(query.trim())) {
         throw new EmptySearchQueryException();
       }
       filters.put("", new SearchFilter() {
@@ -61,6 +62,11 @@ public class Search<T> {
 
     public SearchBuilder<T> inIndex(Class aClass) {
       this.index = aClass.getSimpleName();
+      return this;
+    }
+
+    public SearchBuilder<T> offset(int offset) {
+      this.offset = offset;
       return this;
     }
 
@@ -88,6 +94,7 @@ public class Search<T> {
 
       search.objectIdFinder = objectIdFinder;
       search.limit = 1000;
+      search.offset = offset;
 
       return search;
     }
@@ -103,6 +110,7 @@ public class Search<T> {
   private Map<String, SearchFilter> filters;
   private String index;
   private int limit;
+  private int offset;
 
   private MatchedIdObjectFinder objectIdFinder;
 
@@ -115,7 +123,7 @@ public class Search<T> {
       throw new MissingSearchFiltersException();
     }
 
-    List<String> results = objectIdFinder.find(buildIndexName(index), filters, limit);
+    List<String> results = objectIdFinder.find(buildIndexName(index), filters, limit, offset);
 
     if (idClazz != null) {
 
