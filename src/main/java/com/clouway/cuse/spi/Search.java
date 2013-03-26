@@ -87,6 +87,7 @@ public class Search<T> {
       search.index = index;
 
       search.objectIdFinder = objectIdFinder;
+      search.limit = 1000;
 
       return search;
     }

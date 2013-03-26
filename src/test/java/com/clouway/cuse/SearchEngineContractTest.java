@@ -80,7 +80,7 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(0));
   }
 
-  @Test(expected = EmptyMatcherException.class)
+  @Test(expected = EmptySearchFilterException.class)
   public void searchByEmptyFieldValue() {
 
     store(new User(1l, "Jack"));
@@ -90,7 +90,7 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(0));
   }
 
-  @Test(expected = EmptyMatcherException.class)
+  @Test(expected = EmptySearchFilterException.class)
   public void searchByFieldValueContainingOnlyWhiteSpaces() {
 
     store(new User(1l, "Jack"));

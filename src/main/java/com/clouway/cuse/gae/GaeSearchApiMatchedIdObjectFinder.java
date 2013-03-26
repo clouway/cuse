@@ -1,6 +1,6 @@
 package com.clouway.cuse.gae;
 
-import com.clouway.cuse.spi.EmptyMatcherException;
+import com.clouway.cuse.spi.EmptySearchFilterException;
 import com.clouway.cuse.spi.MatchedIdObjectFinder;
 import com.clouway.cuse.spi.NegativeSearchLimitException;
 import com.clouway.cuse.spi.SearchFilter;
@@ -51,7 +51,7 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
 
       if (filterValue == null || "".equals(filterValue)
               || filter == null) {
-        throw new EmptyMatcherException();
+        throw new EmptySearchFilterException();
       }
 
       if ("".equals(filter)){
