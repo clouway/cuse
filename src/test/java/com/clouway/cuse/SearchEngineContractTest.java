@@ -1,6 +1,7 @@
 package com.clouway.cuse;
 
 import com.clouway.cuse.spi.*;
+import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.google.appengine.tools.development.testing.LocalSearchServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import org.jmock.Expectations;
@@ -442,6 +443,21 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(2));
     assertThat(result.get(0).name, is("Jack Briton"));
     assertThat(result.get(1).name, is("Jack Milar"));
+  }
+
+  @Test
+  public void deleteDocumentsByIds(){
+
+    store(new User(1l, "John"));
+
+    searchEngine.deleteDocument(User.class, Lists.newArrayList(1l));
+
+    List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
+            .where("name", SearchFilters.is("John"))
+            .returnAll()
+            .now();
+
+    assertThat(result.size(), is(0));
   }
 
   private void store(User... users) {

@@ -38,7 +38,7 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
     loadIndex(indexName).put(document);
   }
 
-  private Index loadIndex(String indexName) {
+  public Index loadIndex(String indexName) {
     return SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
             .setName(indexName));
   }

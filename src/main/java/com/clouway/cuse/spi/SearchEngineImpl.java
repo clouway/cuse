@@ -2,6 +2,9 @@ package com.clouway.cuse.spi;
 
 import com.google.inject.Inject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
@@ -47,6 +50,16 @@ public class SearchEngineImpl implements SearchEngine {
       throw new NotConfiguredIdConvertorException();
     }
     return new Search.SearchBuilder<T>(idClass, idClass, entityLoader, indexingStrategyCatalog, idConvertorCatalog, objectIdFinder);
+  }
+
+  @Override
+  public void deleteDocument(Class indexClass, List<Long> ids) {
+    List<String> stringIds = new ArrayList<String>();
+    for (Long id : ids)
+    {
+      stringIds.add(String.valueOf(id));
+    }
+    indexRegister.loadIndex(indexClass.getSimpleName()).delete(stringIds);
   }
 
 }
