@@ -1,6 +1,5 @@
 package com.clouway.cuse.spi;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,5 +13,5 @@ public interface SearchEngine {
 
   <T> Search.SearchBuilder<T> searchIds(Class<T> idClass);
 
-  void deleteDocument(Class indexClass, List<Long> ids);
+  void delete(String indexName, List<Long> objectIds);
 }

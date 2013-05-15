@@ -1,6 +1,7 @@
 package com.clouway.cuse.spi;
 
-import com.google.appengine.api.search.Index;
+
+import java.util.List;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
@@ -8,5 +9,5 @@ import com.google.appengine.api.search.Index;
 public interface IndexRegister {
   void register(Object instance, IndexingStrategy strategy);
 
-  Index loadIndex(String indexName);
+  void delete(String indexName, List<Long> objectIds);
 }

@@ -10,6 +10,7 @@ import com.google.appengine.api.search.Index;
 import com.google.appengine.api.search.IndexSpec;
 import com.google.appengine.api.search.SearchServiceFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,15 +33,21 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
     addDocumentInIndex(strategy.getIndexName(), document);
   }
 
+  public void delete(String indexName, List<Long> objectIds){
+    List<String> stringObjectIds = new ArrayList<String>();
+    for (Long id : objectIds) {
+      stringObjectIds.add(String.valueOf(id));
+    }
+    loadIndex(indexName).delete(stringObjectIds);
+  }
 
+  private Index loadIndex(String indexName) {
+    return SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
+            .setName(indexName));
+  }
 
   private void addDocumentInIndex(String indexName, Document document) {
     loadIndex(indexName).put(document);
-  }
-
-  public Index loadIndex(String indexName) {
-    return SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
-            .setName(indexName));
   }
 
   private Document buildDocument(Object instance, String documentId, List<String> fields, List<String> fullTextFields) {

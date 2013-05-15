@@ -446,11 +446,11 @@ public abstract class SearchEngineContractTest {
   }
 
   @Test
-  public void deleteDocumentsByIds(){
+  public void deleteOneIndexById(){
 
     store(new User(1l, "John"));
 
-    searchEngine.deleteDocument(User.class, Lists.newArrayList(1l));
+    searchEngine.delete(User.class.getSimpleName(), Lists.newArrayList(1l));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
             .where("name", SearchFilters.is("John"))
@@ -458,6 +458,23 @@ public abstract class SearchEngineContractTest {
             .now();
 
     assertThat(result.size(), is(0));
+  }
+
+  @Test
+  public void deleteMoreThanOneIndexByIds(){
+
+    store(new User(1l, "John"));
+    store(new User(2l, "John"));
+
+    searchEngine.delete(User.class.getSimpleName(), Lists.newArrayList(1l, 2l));
+
+    List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
+            .where("name", SearchFilters.is("John"))
+            .returnAll()
+            .now();
+
+    assertThat(result.size(), is(0));
+
   }
 
   private void store(User... users) {
