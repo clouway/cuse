@@ -24,19 +24,20 @@ public class OrSearchFilter implements SearchFilter {
 
   public String getValue() {
 
-    String value = "";
+    StringBuilder builder = new StringBuilder();
+    builder.append("(");
 
     for (int i = 0; i < listOfValues.size(); i++) {
 
-      String s = listOfValues.get(i);
+      String value = listOfValues.get(i);
 
       if (i < listOfValues.size() - 1) {
-        value += s + " OR ";
+        builder.append(value).append(" OR ");
       } else {
-        value += s;
+        builder.append(value).append(")");
       }
     }
 
-    return value;
+    return builder.toString();
   }
 }

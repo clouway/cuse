@@ -477,6 +477,18 @@ public abstract class SearchEngineContractTest {
 
   }
 
+  @Test
+  public void searchByFieldWithMultipleValuesOneOfWhichMatchesAnotherIndexedFieldValue() {
+
+    store(new Employee(1l, "John", "Adams"));
+
+    List<Employee> result = searchEngine.search(Employee.class).where("firstName", isAnyOf("Someone", "Adams"))
+                                                               .returnAll()
+                                                               .now();
+
+    assertThat(result.size(), is(0));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {

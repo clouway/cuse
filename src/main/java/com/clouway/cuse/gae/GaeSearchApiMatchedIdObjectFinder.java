@@ -26,7 +26,7 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
 
     String query = buildQueryFilter(filters);
 
-        Results<ScoredDocument> results = SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
+    Results<ScoredDocument> results = SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
                                                                              .setName(indexName))
                                                                              .search(buildQuery(query, limit, offset));
 
@@ -35,11 +35,8 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
       entityIds.add(scoredDoc.getId());
     }
 
-
     return entityIds;
   }
-
-
 
   private String buildQueryFilter(Map<String, SearchFilter> filters) {
 
@@ -91,6 +88,4 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
 
     return queryOptionsBuilder.build();
   }
-
-
 }
