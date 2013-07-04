@@ -489,6 +489,16 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(0));
   }
 
+  @Test(expected = EmptySearchFilterException.class)
+  public void searchFieldMatchingAnEmptyListOfValues() {
+
+    List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchFilters.isAnyOf(Lists.<Long>newArrayList()))
+                                                               .returnAll()
+                                                               .now();
+
+    assertThat(result.size(), is(0));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {

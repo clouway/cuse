@@ -25,7 +25,10 @@ public class OrSearchFilter implements SearchFilter {
   public String getValue() {
 
     StringBuilder builder = new StringBuilder();
-    builder.append("(");
+
+    if (listOfValues.size() > 0) {
+      builder.append("(");
+    }
 
     for (int i = 0; i < listOfValues.size(); i++) {
 
