@@ -1,8 +1,10 @@
 package com.clouway.cuse.spi;
 
-import java.util.HashMap;
+import com.clouway.cuse.spi.filters.SearchFilter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
@@ -19,7 +21,7 @@ public class Search<T> {
     private IdConvertorCatalog idConvertorCatalog;
     private final MatchedIdObjectFinder objectIdFinder;
 
-    private final Map<String, SearchFilter> filters = new HashMap<String, SearchFilter>();
+    private final List<String> filters = new ArrayList<String>();
     private String index;
     private int offset;
 
@@ -40,8 +42,13 @@ public class Search<T> {
       this.objectIdFinder = objectIdFinder;
     }
 
-    public SearchBuilder<T> where(String field, SearchFilter matcher) {
-      filters.put(field, matcher);
+    public SearchBuilder<T> where(String field, SearchFilter filter) {
+      filters.add(filter.getValue(Arrays.asList(field)));
+      return this;
+    }
+
+    public SearchBuilder where(List<String> fields, SearchFilter filter) {
+      filters.add(filter.getValue(fields));
       return this;
     }
 
@@ -50,12 +57,7 @@ public class Search<T> {
       if (query == null || "".equals(query.trim())) {
         throw new EmptySearchQueryException();
       }
-      filters.put("", new SearchFilter() {
-        @Override
-        public String getValue() {
-          return query;
-        }
-      });
+      filters.add(query);
 
       return this;
     }
@@ -107,7 +109,7 @@ public class Search<T> {
   private IndexingStrategyCatalog indexingStrategyCatalog;
   private IdConvertorCatalog idConvertorCatalog;
 
-  private Map<String, SearchFilter> filters;
+  private List<String> filters;
   private String index;
   private int limit;
   private int offset;

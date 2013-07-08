@@ -1,6 +1,7 @@
 package com.clouway.cuse;
 
 import com.clouway.cuse.spi.*;
+import com.clouway.cuse.gae.filters.SearchFilters;
 import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.google.appengine.tools.development.testing.LocalSearchServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -11,9 +12,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
-import static com.clouway.cuse.spi.SearchFilters.isAnyOf;
+import static com.clouway.cuse.gae.filters.SearchFilters.isAnyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -498,6 +500,38 @@ public abstract class SearchEngineContractTest {
 
     assertThat(result.size(), is(0));
   }
+
+  @Test
+    public void searchByMatchingOneOfTwoFieldValues() {
+
+      store(new Employee(1l, "John", "Brown"));
+      store(new Employee(2l, "Tony", "John"));
+
+      List<Employee> result = searchEngine.search(Employee.class)
+              .where(Arrays.asList("firstName", "lastName"), SearchFilters.anyIs("John"))
+                                                                 .returnAll().now();
+
+      assertThat(result.size(), is(2));
+      assertThat(result.get(0).firstName, is("John"));
+      assertThat(result.get(1).lastName, is("John"));
+    }
+
+
+    @Test
+    public void searchByMatchingOneOfTwoFieldValues2() {
+
+      store(new Employee(1l, "John", "Brown"));
+      store(new Employee(2l, "Tony", "John"));
+
+      List<Employee> result = searchEngine.search(Employee.class)
+              .where(Arrays.asList("firstName", "lastName"), SearchFilters.anyIs("John"))
+                      .where("firstName", SearchFilters.is("Tony"))
+                                                                 .returnAll().now();
+
+      assertThat(result.size(), is(1));
+      assertThat(result.get(0).firstName, is("Tony"));
+      assertThat(result.get(0).lastName, is("John"));
+    }
 
   private void store(User... users) {
 

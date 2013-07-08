@@ -1,4 +1,7 @@
-package com.clouway.cuse.spi;
+package com.clouway.cuse.gae.filters;
+
+import com.clouway.cuse.spi.EmptySearchFilterException;
+import com.clouway.cuse.spi.filters.SearchFilter;
 
 import java.util.List;
 
@@ -8,6 +11,9 @@ import java.util.List;
 public class SearchFilters {
 
   public static SearchFilter is(String value) {
+    if (value == null || "".equals(value.trim())) {
+      throw new EmptySearchFilterException();
+    }
     return new EqualitySearchFilter(value);
   }
 
@@ -28,6 +34,13 @@ public class SearchFilters {
   }
 
   public static SearchFilter isAnyOf(List<Long> values) {
+    if (values == null || values.size() == 0) {
+      throw new EmptySearchFilterException();
+    }
     return new OrSearchFilter(values);
+  }
+
+  public static SearchFilter anyIs(String value) {
+    return new MultiFiledValueFilter(value);
   }
 }

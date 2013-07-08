@@ -1,4 +1,6 @@
-package com.clouway.cuse.spi;
+package com.clouway.cuse.gae.filters;
+
+import com.clouway.cuse.spi.filters.SearchFilter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,8 +24,7 @@ public class OrSearchFilter implements SearchFilter {
     }
   }
 
-  public String getValue() {
-
+  public String getValue(List<String> fields) {
     StringBuilder builder = new StringBuilder();
 
     if (listOfValues.size() > 0) {
@@ -41,6 +42,6 @@ public class OrSearchFilter implements SearchFilter {
       }
     }
 
-    return builder.toString();
+    return fields.get(0) + ":" + builder.toString();
   }
 }

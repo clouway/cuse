@@ -1,9 +1,7 @@
 package com.clouway.cuse.gae;
 
-import com.clouway.cuse.spi.EmptySearchFilterException;
 import com.clouway.cuse.spi.MatchedIdObjectFinder;
 import com.clouway.cuse.spi.NegativeSearchLimitException;
-import com.clouway.cuse.spi.SearchFilter;
 import com.clouway.cuse.spi.SearchLimitExceededException;
 import com.google.appengine.api.search.IndexSpec;
 import com.google.appengine.api.search.Query;
@@ -14,7 +12,6 @@ import com.google.appengine.api.search.SearchServiceFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
@@ -22,7 +19,7 @@ import java.util.Map;
 public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder {
 
   @Override
-  public List<String> find(String indexName, Map<String, SearchFilter> filters, int limit, int offset) {
+  public List<String> find(String indexName, List<String> filters, int limit, int offset) {
 
     String query = buildQueryFilter(filters);
 
@@ -38,24 +35,12 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
     return entityIds;
   }
 
-  private String buildQueryFilter(Map<String, SearchFilter> filters) {
+  private String buildQueryFilter(List<String> filters) {
 
     StringBuilder queryFilter = new StringBuilder();
 
-    for (String filter : filters.keySet()) {
-
-      String filterValue = filters.get(filter).getValue().trim();
-
-      if (filterValue == null || "".equals(filterValue)
-              || filter == null) {
-        throw new EmptySearchFilterException();
-      }
-
-      if ("".equals(filter)){
-        queryFilter.append(filterValue).append(" ");
-      } else {
-        queryFilter.append(filter).append(":").append(filterValue).append(" ");
-      }
+    for (String filter : filters) {
+      queryFilter.append(filter).append(" ");
     }
 
     return queryFilter.toString();
