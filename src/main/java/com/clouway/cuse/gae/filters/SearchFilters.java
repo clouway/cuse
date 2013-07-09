@@ -41,6 +41,6 @@ public class SearchFilters {
   }
 
   public static SearchFilter anyIs(String value) {
-    return new MultiFiledValueFilter(value);
+    return new MultiFieldValueFilter(value);
   }
 }

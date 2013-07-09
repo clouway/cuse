@@ -502,36 +502,36 @@ public abstract class SearchEngineContractTest {
   }
 
   @Test
-    public void searchByMatchingOneOfTwoFieldValues() {
+  public void searchByMatchingOneOfTwoFieldValues() {
 
-      store(new Employee(1l, "John", "Brown"));
-      store(new Employee(2l, "Tony", "John"));
+    store(new Employee(1l, "John", "Brown"));
+    store(new Employee(2l, "Tony", "John"));
 
-      List<Employee> result = searchEngine.search(Employee.class)
-              .where(Arrays.asList("firstName", "lastName"), SearchFilters.anyIs("John"))
-                                                                 .returnAll().now();
+    List<Employee> result = searchEngine.search(Employee.class)
+            .where(Arrays.asList("firstName", "lastName"), SearchFilters.anyIs("John"))
+            .returnAll().now();
 
-      assertThat(result.size(), is(2));
-      assertThat(result.get(0).firstName, is("John"));
-      assertThat(result.get(1).lastName, is("John"));
-    }
+    assertThat(result.size(), is(2));
+    assertThat(result.get(0).firstName, is("John"));
+    assertThat(result.get(1).lastName, is("John"));
+  }
 
 
-    @Test
-    public void searchByMatchingOneOfTwoFieldValues2() {
+  @Test
+  public void searchByMatchingOneOfTwoFieldValuesAndHaveEqualityForOneOfTheFields() {
 
-      store(new Employee(1l, "John", "Brown"));
-      store(new Employee(2l, "Tony", "John"));
+    store(new Employee(1l, "John", "Brown"));
+    store(new Employee(2l, "Tony", "John"));
 
-      List<Employee> result = searchEngine.search(Employee.class)
-              .where(Arrays.asList("firstName", "lastName"), SearchFilters.anyIs("John"))
-                      .where("firstName", SearchFilters.is("Tony"))
-                                                                 .returnAll().now();
+    List<Employee> result = searchEngine.search(Employee.class)
+            .where(Arrays.asList("firstName", "lastName"), SearchFilters.anyIs("John"))
+            .where("firstName", SearchFilters.is("Tony"))
+            .returnAll().now();
 
-      assertThat(result.size(), is(1));
-      assertThat(result.get(0).firstName, is("Tony"));
-      assertThat(result.get(0).lastName, is("John"));
-    }
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).firstName, is("Tony"));
+    assertThat(result.get(0).lastName, is("John"));
+  }
 
   private void store(User... users) {
 

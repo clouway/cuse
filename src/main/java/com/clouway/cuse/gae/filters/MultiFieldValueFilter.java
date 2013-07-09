@@ -7,12 +7,12 @@ import java.util.List;
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
  */
-public class MultiFiledValueFilter implements SearchFilter {
+public class MultiFieldValueFilter implements SearchFilter {
 
 
   private String value;
 
-  public MultiFiledValueFilter(String value) {
+  public MultiFieldValueFilter(String value) {
     this.value = value;
   }
 
