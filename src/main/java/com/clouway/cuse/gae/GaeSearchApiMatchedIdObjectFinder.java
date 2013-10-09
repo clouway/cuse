@@ -1,14 +1,13 @@
 package com.clouway.cuse.gae;
 
+import com.clouway.cuse.gae.exceptions.InvalidIndexNameException;
+import com.clouway.cuse.gae.exceptions.InvalidSearchQueryException;
+import com.clouway.cuse.gae.exceptions.UnableToCreateSearchServiceException;
+import com.clouway.cuse.gae.exceptions.UnableToLoadSearchIndexException;
 import com.clouway.cuse.spi.MatchedIdObjectFinder;
 import com.clouway.cuse.spi.NegativeSearchLimitException;
 import com.clouway.cuse.spi.SearchLimitExceededException;
-import com.google.appengine.api.search.IndexSpec;
-import com.google.appengine.api.search.Query;
-import com.google.appengine.api.search.QueryOptions;
-import com.google.appengine.api.search.Results;
-import com.google.appengine.api.search.ScoredDocument;
-import com.google.appengine.api.search.SearchServiceFactory;
+import com.google.appengine.api.search.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +22,45 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
 
     String query = buildQueryFilter(filters);
 
-    Results<ScoredDocument> results = SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
-                                                                             .setName(indexName))
-                                                                             .search(buildQuery(query, limit, offset));
+    IndexSpec indexSpec;
+
+    try {
+      indexSpec = IndexSpec.newBuilder().setName(indexName).build();
+    } catch (IllegalArgumentException e) {
+      throw new InvalidIndexNameException();
+    }
+
+    SearchService searchService;
+
+    try {
+      searchService = SearchServiceFactory.getSearchService();
+    } catch (IllegalArgumentException e) {
+      throw new UnableToCreateSearchServiceException();
+    }
+
+    Index searchIndex;
+
+    try {
+      searchIndex = searchService.getIndex(indexSpec);
+    } catch (GetException e) {
+      throw new UnableToLoadSearchIndexException();
+    }
+
+    Results<ScoredDocument> documents;
+
+    try {
+      documents = searchIndex.search(buildQuery(query, limit, offset));
+    } catch (IllegalArgumentException e) {
+      throw new InvalidSearchQueryException();
+    } catch (SearchQueryException e) {
+      throw new InvalidSearchQueryException();
+    } catch (SearchException e) {
+      throw new InvalidSearchQueryException();
+    }
 
     List<String> entityIds = new ArrayList<String>();
-    for (ScoredDocument scoredDoc : results) {
-      entityIds.add(scoredDoc.getId());
+    for (ScoredDocument document : documents) {
+      entityIds.add(document.getId());
     }
 
     return entityIds;
