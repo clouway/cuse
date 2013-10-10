@@ -24,8 +24,8 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
     String query = buildQueryFilter(filters);
 
     Results<ScoredDocument> results = SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
-                                                                             .setName(indexName))
-                                                                             .search(buildQuery(query, limit, offset));
+            .setName(indexName))
+            .search(buildQuery(query, limit, offset));
 
     List<String> entityIds = new ArrayList<String>();
     for (ScoredDocument scoredDoc : results) {

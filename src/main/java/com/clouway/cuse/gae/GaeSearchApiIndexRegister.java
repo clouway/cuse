@@ -89,9 +89,9 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
       fieldValue = String.valueOf(declaredField.get(instance));
 
     } catch (IllegalAccessException e) {
-      e.printStackTrace();
+      throw new FieldNotAccessibleException();
     } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+      throw new NoFieldOfASpecifiedNameException();
     }
 
     return fieldValue;
