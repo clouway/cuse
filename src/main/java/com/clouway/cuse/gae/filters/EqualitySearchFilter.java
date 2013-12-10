@@ -15,6 +15,10 @@ public class EqualitySearchFilter implements SearchFilter {
     this.value = value;
   }
 
+  public EqualitySearchFilter(SearchDate searchDate) {
+    this.value = searchDate.getValue();
+  }
+
   public String getValue(List<String> fields) {
     return fields.get(0) + ":" + value;
   }

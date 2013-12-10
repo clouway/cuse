@@ -13,8 +13,13 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
+import static com.clouway.cuse.Employee.aNewEmployee;
 import static com.clouway.cuse.gae.filters.SearchFilters.isAnyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -533,6 +538,69 @@ public abstract class SearchEngineContractTest {
     assertThat(result.get(0).lastName, is("John"));
   }
 
+  @Test
+  public void searchByFieldLessThanGivenDate() {
+
+    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 20)).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.lessThan(aNewDate(2013, 12, 25))).returnAll().now();
+
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).id, is(equalTo(1l)));
+  }
+
+  @Test
+  public void searchByFieldGreaterThanGivenDate() {
+
+    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 10)).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThan(aNewDate(2013, 12, 1))).returnAll().now();
+
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).id, is(1l));
+  }
+
+  @Test
+  public void searchByFieldEqualToGivenDate() {
+
+    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 20)).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.equalTo(aNewDate(2013, 12, 20))).returnAll().now();
+
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).id, is(1l));
+  }
+
+  @Test
+  public void searchByFieldLessThanOrEqualToGivenDate() {
+
+    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 10)).build());
+    store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 12, 20)).build());
+    store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 12, 26)).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.lessThanOrEqualTo(aNewDate(2013, 12, 20))).returnAll().now();
+    sortEmployeesById(result);
+
+    assertThat(result.size(), is(2));
+    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(1).id, is(2l));
+  }
+
+  @Test
+  public void searchByFieldGreaterThanOrEqualToGivenDate() {
+
+    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 10)).build());
+    store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 12, 20)).build());
+    store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 12, 26)).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThanOrEqualTo(aNewDate(2013, 12, 20))).returnAll().now();
+    sortEmployeesById(result);
+
+    assertThat(result.size(), is(2));
+    assertThat(result.get(0).id, is(2l));
+    assertThat(result.get(1).id, is(3l));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {
@@ -547,5 +615,26 @@ public abstract class SearchEngineContractTest {
       repository.store(employee.id, employee);
       searchEngine.register(employee);
     }
+  }
+
+  private void sortEmployeesById(List<Employee> employees) {
+
+    Collections.sort(employees, new Comparator<Employee>() {
+      @Override
+      public int compare(Employee o1, Employee o2) {
+
+        if (o1.id < o2.id) {
+          return -1;
+        } else {
+          return 1;
+        }
+      }
+    });
+  }
+
+  private Date aNewDate(int year, int month, int day) {
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(year, month - 1, day);
+    return calendar.getTime();
   }
 }

@@ -11,9 +11,8 @@ import com.google.appengine.api.search.IndexSpec;
 import com.google.appengine.api.search.SearchServiceFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,46 +53,42 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
 
     Document.Builder documentBuilder = Document.newBuilder().setId(documentId);
 
-    Map<String, String> documentFields = new HashMap<String, String>();
     for (java.lang.reflect.Field field : instance.getClass().getDeclaredFields()) {
 
       if (fields.contains(field.getName())) {
-        String fieldValue = getFieldValue(instance, field);
-        documentFields.put(field.getName(), fieldValue);
+        Object fieldValue = getFieldValue(instance, field);
+
+        if (fieldValue != null && field.getType().equals(Date.class)) {
+          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setDate((Date) fieldValue));
+        } else {
+          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(String.valueOf(fieldValue)));
+        }
       }
 
       if (fullTextFields.contains(field.getName())) {
-        Set<String> fieldValues = new IndexWriter().createIndex(getFieldValue(instance, field));
+        Set<String> fieldValues = new IndexWriter().createIndex(String.valueOf(getFieldValue(instance, field)));
         for (String fieldValue : fieldValues) {
           documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(fieldValue));
         }
       }
     }
 
-    for (String field : documentFields.keySet()) {
-      String fieldValue = documentFields.get(field);
-      documentBuilder.addField(Field.newBuilder().setName(field).setText(fieldValue));
-    }
-
     return documentBuilder.build();
   }
 
-  private String getFieldValue(Object instance, java.lang.reflect.Field field) {
-
-    String fieldValue = "";
+  private Object getFieldValue(Object instance, java.lang.reflect.Field field) {
 
     try {
 
       java.lang.reflect.Field declaredField = instance.getClass().getDeclaredField(field.getName());
       declaredField.setAccessible(true);
-      fieldValue = String.valueOf(declaredField.get(instance));
+
+      return declaredField.get(instance);
 
     } catch (IllegalAccessException e) {
       throw new FieldNotAccessibleException();
     } catch (NoSuchFieldException e) {
       throw new NoFieldOfASpecifiedNameException();
     }
-
-    return fieldValue;
   }
 }

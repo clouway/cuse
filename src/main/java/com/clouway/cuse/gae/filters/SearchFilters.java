@@ -3,6 +3,7 @@ package com.clouway.cuse.gae.filters;
 import com.clouway.cuse.spi.EmptySearchFilterException;
 import com.clouway.cuse.spi.filters.SearchFilter;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,5 +43,25 @@ public class SearchFilters {
 
   public static SearchFilter anyIs(String value) {
     return new MultiFieldValueFilter(value);
+  }
+
+  public static SearchFilter lessThan(Date value) {
+    return new LessThanFilter(new SearchDate(value));
+  }
+
+  public static SearchFilter greaterThan(Date value) {
+    return new GreaterThanFilter(new SearchDate(value));
+  }
+
+  public static SearchFilter equalTo(Date value) {
+    return new EqualitySearchFilter(new SearchDate(value));
+  }
+
+  public static SearchFilter lessThanOrEqualTo(Date value) {
+    return new LessThanOrEqualToFilter(new SearchDate(value));
+  }
+
+  public static SearchFilter greaterThanOrEqualTo(Date value) {
+    return new GreaterThanOrEqualToFilter(new SearchDate(value));
   }
 }
