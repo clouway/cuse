@@ -3,12 +3,9 @@ package com.clouway.cuse.gae;
 import com.clouway.cuse.spi.MatchedIdObjectFinder;
 import com.clouway.cuse.spi.NegativeSearchLimitException;
 import com.clouway.cuse.spi.SearchLimitExceededException;
-import com.google.appengine.api.search.IndexSpec;
-import com.google.appengine.api.search.Query;
-import com.google.appengine.api.search.QueryOptions;
-import com.google.appengine.api.search.Results;
-import com.google.appengine.api.search.ScoredDocument;
-import com.google.appengine.api.search.SearchServiceFactory;
+import com.clouway.cuse.spi.SortOrder;
+import com.google.appengine.api.search.*;
+import com.google.appengine.repackaged.com.google.common.base.Strings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +16,13 @@ import java.util.List;
 public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder {
 
   @Override
-  public List<String> find(String indexName, List<String> filters, int limit, int offset) {
+  public List<String> find(String indexName, List<String> filters, int limit, int offset, String sortingField, SortOrder sortOrder) {
 
-    String query = buildQueryFilter(filters);
+    String query = buildSearchQuery(filters);
 
     Results<ScoredDocument> results = SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
             .setName(indexName))
-            .search(buildQuery(query, limit, offset));
+            .search(buildQuery(query, limit, offset, sortingField, sortOrder));
 
     List<String> entityIds = new ArrayList<String>();
     for (ScoredDocument scoredDoc : results) {
@@ -35,7 +32,7 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
     return entityIds;
   }
 
-  private String buildQueryFilter(List<String> filters) {
+  private String buildSearchQuery(List<String> filters) {
 
     StringBuilder queryFilter = new StringBuilder();
 
@@ -46,14 +43,21 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
     return queryFilter.toString();
   }
 
-  private Query buildQuery(String searchQuery, int limit, int offset) {
+  private Query buildQuery(String searchQuery, int limit, int offset, String sortingField, SortOrder sortOrder) {
 
-    QueryOptions queryOptions = buildQueryOptions(limit, offset);
+    QueryOptions.Builder queryOptionsBuilder = queryOptionsBuilder(limit, offset);
+
+    if (!Strings.isNullOrEmpty(sortingField)) {
+      SortOptions sortOptions = buildSortOptions(sortingField, sortOrder);
+      queryOptionsBuilder.setSortOptions(sortOptions);
+    }
+
+    QueryOptions queryOptions = queryOptionsBuilder.build();
 
     return Query.newBuilder().setOptions(queryOptions).build(searchQuery);
   }
 
-  private QueryOptions buildQueryOptions(int limit, int offset) {
+  private QueryOptions.Builder queryOptionsBuilder(int limit, int offset) {
 
     QueryOptions.Builder queryOptionsBuilder = QueryOptions.newBuilder().setReturningIdsOnly(true);
 
@@ -71,6 +75,29 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
 
     queryOptionsBuilder.setOffset(offset);
 
-    return queryOptionsBuilder.build();
+    return queryOptionsBuilder;
+  }
+
+  private SortOptions buildSortOptions(String sortingField, SortOrder sortOrder) {
+
+    SortOptions.Builder sortOptionsBuilder = SortOptions.newBuilder();
+
+    SortExpression.Builder sortExpressionBuilder = SortExpression.newBuilder();
+    sortExpressionBuilder.setDefaultValue("");
+    sortExpressionBuilder.setExpression(sortingField);
+
+    if (sortOrder.equals(SortOrder.ASCENDING)) {
+      sortExpressionBuilder.setDirection(SortExpression.SortDirection.ASCENDING);
+    }
+
+    if (sortOrder.equals(SortOrder.DESCENDING)) {
+      sortExpressionBuilder.setDirection(SortExpression.SortDirection.DESCENDING);
+    }
+
+    SortExpression sortExpression = sortExpressionBuilder.build();
+
+    sortOptionsBuilder.addSortExpression(sortExpression);
+
+    return sortOptionsBuilder.build();
   }
 }

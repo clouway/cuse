@@ -24,6 +24,8 @@ public class Search<T> {
     private final List<String> filters = new ArrayList<String>();
     private String index;
     private int offset;
+    private String sortingField;
+    private SortOrder sortOrder;
 
     public SearchBuilder(Class<T> clazz, EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, MatchedIdObjectFinder objectIdFinder) {
       this.clazz = clazz;
@@ -80,6 +82,13 @@ public class Search<T> {
       return search;
     }
 
+    public SearchBuilder<T> sortBy(String sortingField, SortOrder sortOrder) {
+      this.sortingField = sortingField;
+      this.sortOrder = sortOrder;
+
+      return this;
+    }
+
     public Search<T> returnAll() {
 
       Search<T> search = new Search<T>();
@@ -97,6 +106,8 @@ public class Search<T> {
       search.objectIdFinder = objectIdFinder;
       search.limit = 1000;
       search.offset = offset;
+      search.sortingField = sortingField;
+      search.sortOrder = sortOrder;
 
       return search;
     }
@@ -113,6 +124,8 @@ public class Search<T> {
   private String index;
   private int limit;
   private int offset;
+  private String sortingField;
+  private SortOrder sortOrder;
 
   private MatchedIdObjectFinder objectIdFinder;
 
@@ -125,7 +138,7 @@ public class Search<T> {
       throw new MissingSearchFiltersException();
     }
 
-    List<String> results = objectIdFinder.find(buildIndexName(index), filters, limit, offset);
+    List<String> results = objectIdFinder.find(buildIndexName(index), filters, limit, offset, sortingField, sortOrder);
 
     if (idClazz != null) {
 
