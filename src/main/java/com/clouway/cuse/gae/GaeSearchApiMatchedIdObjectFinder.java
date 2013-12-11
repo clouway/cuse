@@ -83,7 +83,7 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
     SortOptions.Builder sortOptionsBuilder = SortOptions.newBuilder();
 
     SortExpression.Builder sortExpressionBuilder = SortExpression.newBuilder();
-    sortExpressionBuilder.setDefaultValue("id");
+    sortExpressionBuilder.setDefaultValue("");
     sortExpressionBuilder.setExpression(sortingField);
 
     if (sortOrder.equals(SortOrder.ASCENDING)) {
