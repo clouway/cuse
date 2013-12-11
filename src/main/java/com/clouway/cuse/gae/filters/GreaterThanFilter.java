@@ -9,14 +9,14 @@ import java.util.List;
  */
 public class GreaterThanFilter implements SearchFilter {
 
-  private final SearchDate searchDate;
+  private final SearchableDate searchableDate;
 
-  public GreaterThanFilter(SearchDate searchDate) {
-    this.searchDate = searchDate;
+  public GreaterThanFilter(SearchableDate searchableDate) {
+    this.searchableDate = searchableDate;
   }
 
   @Override
   public String getValue(List<String> fields) {
-    return fields.get(0) + " > " + searchDate.getValue();
+    return fields.get(0) + " > " + searchableDate.getValue();
   }
 }

@@ -15,8 +15,8 @@ public class EqualitySearchFilter implements SearchFilter {
     this.value = value;
   }
 
-  public EqualitySearchFilter(SearchDate searchDate) {
-    this.value = searchDate.getValue();
+  public EqualitySearchFilter(SearchableDate searchableDate) {
+    this.value = searchableDate.getValue();
   }
 
   public String getValue(List<String> fields) {

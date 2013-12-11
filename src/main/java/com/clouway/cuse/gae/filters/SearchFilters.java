@@ -46,22 +46,22 @@ public class SearchFilters {
   }
 
   public static SearchFilter lessThan(Date value) {
-    return new LessThanFilter(new SearchDate(value));
+    return new LessThanFilter(new SearchableDate(value));
   }
 
   public static SearchFilter greaterThan(Date value) {
-    return new GreaterThanFilter(new SearchDate(value));
+    return new GreaterThanFilter(new SearchableDate(value));
   }
 
   public static SearchFilter equalTo(Date value) {
-    return new EqualitySearchFilter(new SearchDate(value));
+    return new EqualitySearchFilter(new SearchableDate(value));
   }
 
   public static SearchFilter lessThanOrEqualTo(Date value) {
-    return new LessThanOrEqualToFilter(new SearchDate(value));
+    return new LessThanOrEqualToFilter(new SearchableDate(value));
   }
 
   public static SearchFilter greaterThanOrEqualTo(Date value) {
-    return new GreaterThanOrEqualToFilter(new SearchDate(value));
+    return new GreaterThanOrEqualToFilter(new SearchableDate(value));
   }
 }

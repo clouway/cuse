@@ -674,6 +674,19 @@ public abstract class SearchEngineContractTest {
     assertThat(result.get(2).id, is(1l));
   }
 
+  @Test
+  public void searchByDateFieldsGreaterThanGivenTime() {
+
+    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 10, 9, 30)).build());
+    store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 12, 10, 11, 0)).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThan(aNewDate(2013, 12, 10, 9, 45)))
+                                                               .returnAll().now();
+
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).id, is(2l));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {
@@ -708,6 +721,12 @@ public abstract class SearchEngineContractTest {
   private Date aNewDate(int year, int month, int day) {
     Calendar calendar = Calendar.getInstance();
     calendar.set(year, month - 1, day);
+    return calendar.getTime();
+  }
+
+  private Date aNewDate(int year, int month, int day, int hour, int minutes) {
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(year, month - 1, day, hour, minutes);
     return calendar.getTime();
   }
 }
