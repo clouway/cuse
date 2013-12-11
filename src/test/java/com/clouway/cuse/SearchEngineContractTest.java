@@ -221,6 +221,8 @@ public abstract class SearchEngineContractTest {
                                                                .fetchMaximum(2)
                                                                .now();
 
+    sortEmployeesById(result);
+
     assertThat(result.size(), is(2));
     assertThat(result.get(0).id, is(1l));
     assertThat(result.get(1).id, is(2l));
@@ -599,6 +601,77 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(2));
     assertThat(result.get(0).id, is(2l));
     assertThat(result.get(1).id, is(3l));
+  }
+
+  @Test
+  public void sortByDateInAscendingOrder() {
+
+    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 20)).build());
+    store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 1, 1)).build());
+    store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 5, 18)).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThanOrEqualTo(aNewDate(2013, 1, 1)))
+                                                               .sortBy("birthDate", SortOrder.ASCENDING)
+                                                               .returnAll().now();
+
+    assertThat(result.size(), is(3));
+    assertThat(result.get(0).id, is(equalTo(2l)));
+    assertThat(result.get(1).id, is(equalTo(3l)));
+    assertThat(result.get(2).id, is(equalTo(1l)));
+  }
+
+  @Test
+  public void sortByDateInDescendingOrder() {
+
+    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 1, 5)).build());
+    store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 5, 10)).build());
+    store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 8, 20)).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThanOrEqualTo(aNewDate(2013, 1, 1)))
+                                                               .sortBy("birthDate", SortOrder.DESCENDING)
+                                                               .returnAll().now();
+
+    assertThat(result.size(), is(3));
+    assertThat(result.get(0).id, is(equalTo(3l)));
+    assertThat(result.get(1).id, is(equalTo(2l)));
+    assertThat(result.get(2).id, is(equalTo(1l)));
+  }
+
+  @Test
+  public void sortByStringInAscendingOrder() {
+
+    Date birthDate = aNewDate(2013, 1, 1);
+
+    store(aNewEmployee().id(1l).firstName("John").birthDate(birthDate).build());
+    store(aNewEmployee().id(2l).firstName("Adam").birthDate(birthDate).build());
+    store(aNewEmployee().id(3l).firstName("Bob").birthDate(birthDate).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.equalTo(birthDate))
+                                                               .sortBy("firstName", SortOrder.ASCENDING)
+                                                               .returnAll()
+                                                               .now();
+
+    assertThat(result.size(), is(3));
+    assertThat(result.get(0).firstName, is("Adam"));
+    assertThat(result.get(1).firstName, is("Bob"));
+    assertThat(result.get(2).firstName, is("John"));
+  }
+
+  @Test
+  public void sortByIntegerInDescendingOrder() {
+
+    store(aNewEmployee().id(1l).firstName("John").age(18).build());
+    store(aNewEmployee().id(2l).firstName("John").age(25).build());
+    store(aNewEmployee().id(3l).firstName("John").age(20).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchFilters.is("John"))
+                                                               .sortBy("age", SortOrder.DESCENDING)
+                                                               .returnAll().now();
+
+    assertThat(result.size(), is(3));
+    assertThat(result.get(0).id, is(2l));
+    assertThat(result.get(1).id, is(3l));
+    assertThat(result.get(2).id, is(1l));
   }
 
   private void store(User... users) {

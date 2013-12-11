@@ -15,6 +15,8 @@ public class Employee {
 
     private Long id;
     private Date birthDate;
+    private String firstName;
+    private Integer age;
 
     public Builder id(Long id) {
       this.id = id;
@@ -26,8 +28,26 @@ public class Employee {
       return this;
     }
 
+    public Builder firstName(String firstName) {
+      this.firstName = firstName;
+      return this;
+    }
+
     public Employee build() {
-      return new Employee(id, birthDate);
+
+      Employee employee = new Employee();
+
+      employee.id = id;
+      employee.firstName = firstName;
+      employee.age = age;
+      employee.birthDate = birthDate;
+
+      return employee;
+    }
+
+    public Builder age(Integer age) {
+      this.age = age;
+      return this;
     }
   }
 
@@ -36,6 +56,10 @@ public class Employee {
   public String lastName;
   public boolean assigned;
   public Date birthDate;
+  private Integer age;
+
+  public Employee() {
+  }
 
   public Employee(Long id, String firstName) {
     this.id = id;
@@ -51,10 +75,5 @@ public class Employee {
   public Employee(Long id, boolean assigned) {
     this.id = id;
     this.assigned = assigned;
-  }
-
-  public Employee(Long id, Date birthDate) {
-    this.id = id;
-    this.birthDate = birthDate;
   }
 }
