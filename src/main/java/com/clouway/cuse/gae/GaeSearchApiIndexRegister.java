@@ -59,7 +59,8 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
         Object fieldValue = getFieldValue(instance, field);
 
         if (fieldValue != null && field.getType().equals(Date.class)) {
-          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setDate((Date) fieldValue));
+          Long dateInMilliseconds = ((Date) fieldValue).getTime() / 1000;
+          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setNumber(dateInMilliseconds));
         } else {
           documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(String.valueOf(fieldValue)));
         }

@@ -1,6 +1,5 @@
 package com.clouway.cuse.gae.filters;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -11,8 +10,6 @@ import java.util.Date;
  */
 class SearchDate {
 
-  private static final SimpleDateFormat dateFormat = new SimpleDateFormat(("yyyy-MM-dd"));
-
   private final Date date;
 
   public SearchDate(Date date) {
@@ -20,6 +17,6 @@ class SearchDate {
   }
 
   public String getValue() {
-    return dateFormat.format(date);
+    return String.valueOf(date.getTime() / 1000);
   }
 }
