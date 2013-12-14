@@ -687,6 +687,36 @@ public abstract class SearchEngineContractTest {
     assertThat(result.get(0).id, is(2l));
   }
 
+  @Test
+  public void nullDateFieldsAreNotIndexed() {
+
+    store(aNewEmployee().id(1l).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.is("null")).returnAll().now();
+
+    assertThat(result.size(), is(0));
+  }
+
+  @Test
+  public void searchByTextFieldWithoutValue() {
+
+    store(aNewEmployee().id(1l).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchFilters.is("John")).returnAll().now();
+
+    assertThat(result.size(), is(0));
+  }
+
+  @Test
+  public void searchByNumberFieldWithoutValue() {
+
+    store(aNewEmployee().id(1l).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThan(aNewDate(2013, 12, 10, 9, 45))).returnAll().now();
+
+    assertThat(result.size(), is(0));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {

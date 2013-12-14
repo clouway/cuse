@@ -55,21 +55,37 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
 
     for (java.lang.reflect.Field field : instance.getClass().getDeclaredFields()) {
 
-      if (fields.contains(field.getName())) {
-        Object fieldValue = getFieldValue(instance, field);
+      Object fieldValue = getFieldValue(instance, field);
 
-        if (fieldValue != null && field.getType().equals(Date.class)) {
-          Long dateInSeconds = ((Date) fieldValue).getTime() / 1000;
-          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setNumber(dateInSeconds));
+      if (fields.contains(field.getName())) {
+
+        if (fieldValue == null) {
+
+          buildEmptyField(documentBuilder, field);
+
+        } else if (field.getType().equals(Date.class)) {
+
+          buildNumberField(documentBuilder, field, (Date) fieldValue);
+
         } else {
-          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(String.valueOf(fieldValue)));
+
+          buildTextField(documentBuilder, field, fieldValue);
         }
       }
 
       if (fullTextFields.contains(field.getName())) {
-        Set<String> fieldValues = new IndexWriter().createIndex(String.valueOf(getFieldValue(instance, field)));
-        for (String fieldValue : fieldValues) {
-          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(fieldValue));
+
+        if (fieldValue == null) {
+
+          buildEmptyField(documentBuilder, field);
+
+        } else {
+
+          Set<String> fieldValues = new IndexWriter().createIndex(String.valueOf(fieldValue));
+
+          for (String value : fieldValues) {
+            documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(value));
+          }
         }
       }
     }
@@ -91,5 +107,18 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
     } catch (NoSuchFieldException e) {
       throw new NoFieldOfASpecifiedNameException();
     }
+  }
+
+  private void buildEmptyField(Document.Builder documentBuilder, java.lang.reflect.Field field) {
+    documentBuilder.addField(Field.newBuilder().setName(field.getName()));
+  }
+
+  private void buildNumberField(Document.Builder documentBuilder, java.lang.reflect.Field field, Date fieldValue) {
+    Long dateInSeconds = fieldValue.getTime() / 1000;
+    documentBuilder.addField(Field.newBuilder().setName(field.getName()).setNumber(dateInSeconds));
+  }
+
+  private void buildTextField(Document.Builder documentBuilder, java.lang.reflect.Field field, Object fieldValue) {
+    documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(String.valueOf(fieldValue)));
   }
 }
