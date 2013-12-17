@@ -611,7 +611,7 @@ public abstract class SearchEngineContractTest {
     store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 5, 18)).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThanOrEqualTo(aNewDate(2013, 1, 1)))
-                                                               .sortBy("birthDate", SortOrder.ASCENDING)
+                                                               .sortBy("birthDate", SortOrder.ASCENDING, SortType.NUMERIC)
                                                                .returnAll().now();
 
     assertThat(result.size(), is(3));
@@ -628,7 +628,7 @@ public abstract class SearchEngineContractTest {
     store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 8, 20)).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThanOrEqualTo(aNewDate(2013, 1, 1)))
-                                                               .sortBy("birthDate", SortOrder.DESCENDING)
+                                                               .sortBy("birthDate", SortOrder.DESCENDING, SortType.NUMERIC)
                                                                .returnAll().now();
 
     assertThat(result.size(), is(3));
@@ -647,7 +647,7 @@ public abstract class SearchEngineContractTest {
     store(aNewEmployee().id(3l).firstName("Bob").birthDate(birthDate).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.equalTo(birthDate))
-                                                               .sortBy("firstName", SortOrder.ASCENDING)
+                                                               .sortBy("firstName", SortOrder.ASCENDING, SortType.TEXT)
                                                                .returnAll()
                                                                .now();
 
@@ -665,7 +665,7 @@ public abstract class SearchEngineContractTest {
     store(aNewEmployee().id(3l).firstName("John").age(20).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchFilters.is("John"))
-                                                               .sortBy("age", SortOrder.DESCENDING)
+                                                               .sortBy("age", SortOrder.DESCENDING, SortType.TEXT)
                                                                .returnAll().now();
 
     assertThat(result.size(), is(3));

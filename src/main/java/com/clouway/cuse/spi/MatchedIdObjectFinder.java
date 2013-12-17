@@ -7,5 +7,5 @@ import java.util.List;
  */
 public interface MatchedIdObjectFinder {
 
-  List<String> find(String indexName, List<String> filters, int limit, int offset, String sortingField, SortOrder sortOrder);
+  List<String> find(String indexName, List<String> filters, int limit, int offset, String sortingField, SortOrder sortOrder, SortType sortType);
 }
