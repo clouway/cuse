@@ -174,14 +174,16 @@ public abstract class SearchEngineContractTest {
     assertThat(result.get(1).id, is(2l));
   }
 
-  @Test(expected = EmptySearchQueryException.class)
+  @Test(expected = MissingSearchFiltersException.class)
   public void searchByEmptyQuery() {
 
     store(new User(1l, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("").returnAll().now();
 
-    assertThat(result.size(), is(0));
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).name, is("Jack"));
   }
 
   @Test
@@ -269,7 +271,9 @@ public abstract class SearchEngineContractTest {
 
     List<User> result = searchEngine.search(User.class).returnAll().now();
 
-    assertThat(result.size(), is(0));
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).name, is("John"));
   }
 
   @Test(expected = NotConfiguredIndexingStrategyException.class)
@@ -715,6 +719,34 @@ public abstract class SearchEngineContractTest {
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThan(aNewDate(2013, 12, 10, 9, 45))).returnAll().now();
 
     assertThat(result.size(), is(0));
+  }
+
+  @Test
+  public void searchForMatchingAllOfTheFieldValues() {
+
+    store(aNewEmployee().id(1l).tags(Arrays.asList("1", "2", "answered")).build());
+    store(aNewEmployee().id(2l).tags(Arrays.asList("test")).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("tags", SearchFilters.is(Arrays.asList("1", "2", "answered"))).returnAll().now();
+
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).id, is(1l));
+  }
+
+  @Test
+  public void searchForMatchingAnyOfTheFieldValues() {
+
+    store(aNewEmployee().id(1l).age(18).build());
+    store(aNewEmployee().id(2l).age(19).build());
+    store(aNewEmployee().id(3l).age(20).build());
+
+    List<Employee> result = searchEngine.search(Employee.class).where("age", SearchFilters.isAnyOf(Arrays.asList(18, 20)))
+                                                               .sortBy("age", SortOrder.ASCENDING, SortType.NUMERIC)
+                                                               .returnAll().now();
+
+    assertThat(result.size(), is(2));
+    assertThat(result.get(0).id, is(equalTo(1l)));
+    assertThat(result.get(1).id, is(equalTo(3l)));
   }
 
   private void store(User... users) {

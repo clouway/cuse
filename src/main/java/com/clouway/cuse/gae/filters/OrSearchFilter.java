@@ -17,9 +17,9 @@ public class OrSearchFilter implements SearchFilter {
     Collections.addAll(listOfValues, values);
   }
 
-  public OrSearchFilter(List<Long> values) {
+  public <T> OrSearchFilter(List<T> values) {
 
-    for (Long value : values) {
+    for (T value : values) {
       listOfValues.add(String.valueOf(value));
     }
   }

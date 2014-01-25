@@ -34,7 +34,7 @@ public class SearchFilters {
     return new OrSearchFilter(values);
   }
 
-  public static SearchFilter isAnyOf(List<Long> values) {
+  public static <T> SearchFilter isAnyOf(List<T> values) {
     if (values == null || values.size() == 0) {
       throw new EmptySearchFilterException();
     }
@@ -63,5 +63,9 @@ public class SearchFilters {
 
   public static SearchFilter greaterThanOrEqualTo(Date value) {
     return new GreaterThanOrEqualToFilter(new SearchableDate(value));
+  }
+
+  public static SearchFilter is(List<String> values) {
+    return new EqualitySearchFilter(values);
   }
 }

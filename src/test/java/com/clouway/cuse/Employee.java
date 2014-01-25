@@ -1,6 +1,7 @@
 package com.clouway.cuse;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
@@ -17,6 +18,7 @@ public class Employee {
     private Date birthDate;
     private String firstName;
     private Integer age;
+    private List<String> tags;
 
     public Builder id(Long id) {
       this.id = id;
@@ -41,12 +43,18 @@ public class Employee {
       employee.firstName = firstName;
       employee.age = age;
       employee.birthDate = birthDate;
+      employee.tags = tags;
 
       return employee;
     }
 
     public Builder age(Integer age) {
       this.age = age;
+      return this;
+    }
+
+    public Builder tags(List<String> tags) {
+      this.tags = tags;
       return this;
     }
   }
@@ -57,6 +65,7 @@ public class Employee {
   public boolean assigned;
   public Date birthDate;
   private Integer age;
+  private List<String> tags;
 
   public Employee() {
   }

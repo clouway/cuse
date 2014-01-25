@@ -57,10 +57,12 @@ public class Search<T> {
 
     public SearchBuilder<T> where(final String query) {
 
-      if (query == null || "".equals(query.trim())) {
-        throw new EmptySearchQueryException();
+      if (query != null ) {
+        if (!"".equals(query.trim())) {
+          filters.add(query);
+        }
       }
-      filters.add(query);
+
 
       return this;
     }
