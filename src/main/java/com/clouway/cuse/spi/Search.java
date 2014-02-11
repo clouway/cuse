@@ -125,7 +125,7 @@ public class Search<T> {
   private IndexingStrategyCatalog indexingStrategyCatalog;
   private IdConvertorCatalog idConvertorCatalog;
 
-  private List<String> filters;
+  private List<String> filters = new ArrayList<String>();
   private String index;
   private int limit;
   private int offset;
@@ -139,10 +139,6 @@ public class Search<T> {
   }
 
   public List<T> now() {
-
-    if (filters == null || filters.size() == 0) {
-      throw new MissingSearchFiltersException();
-    }
 
     List<String> results = objectIdFinder.find(buildIndexName(index), filters, limit, offset, sortingField, sortOrder, sortType);
 

@@ -174,7 +174,7 @@ public abstract class SearchEngineContractTest {
     assertThat(result.get(1).id, is(2l));
   }
 
-  @Test(expected = MissingSearchFiltersException.class)
+  @Test
   public void searchByEmptyQuery() {
 
     store(new User(1l, "Jack"));
@@ -264,7 +264,7 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(0));
   }
 
-  @Test(expected = MissingSearchFiltersException.class)
+  @Test
   public void searchWithoutSpecifyingFiltersMatcher() {
 
     store(new User(1l, "John"));
