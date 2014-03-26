@@ -3,7 +3,8 @@ package com.clouway.cuse.spi;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public interface IdConvertorCatalog {
+public interface IdConverterCatalog {
 
-  IdConvertor getConvertor(Class aClass);
+  IdConverter getConverter(Class aClass);
+
 }

@@ -1,11 +1,16 @@
 package com.clouway.cuse;
 
+import com.clouway.cuse.spi.annotations.FullTextSearch;
+import com.clouway.cuse.spi.annotations.SearchId;
+import com.clouway.cuse.spi.annotations.SearchIndex;
+
 import java.util.Date;
 import java.util.List;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
+@SearchIndex(name = "EmployeeIndex")
 public class Employee {
 
   static Builder aNewEmployee() {
@@ -59,8 +64,11 @@ public class Employee {
     }
   }
 
+  @SearchId
   public Long id;
   public String firstName;
+
+  @FullTextSearch
   public String lastName;
   public boolean assigned;
   public Date birthDate;

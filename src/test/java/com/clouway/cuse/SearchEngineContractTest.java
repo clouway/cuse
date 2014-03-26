@@ -1,7 +1,7 @@
 package com.clouway.cuse;
 
-import com.clouway.cuse.spi.*;
 import com.clouway.cuse.gae.filters.SearchFilters;
+import com.clouway.cuse.spi.*;
 import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
 import com.google.appengine.tools.development.testing.LocalSearchServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -41,12 +42,6 @@ public abstract class SearchEngineContractTest {
 
   private EntityLoader entityLoader = context.mock(EntityLoader.class);
 
-  private IndexingStrategyCatalog indexingStrategyCatalog;
-
-  private IndexRegister indexRegister = context.mock(IndexRegister.class);
-
-  private MatchedIdObjectFinder objectIdFinder = context.mock(MatchedIdObjectFinder.class);
-
   protected abstract SearchEngine createSearchEngine();
 
   protected abstract InMemoryRepository createInMemoryRepository();
@@ -55,8 +50,6 @@ public abstract class SearchEngineContractTest {
   public void setUp() {
 
     helper.setUp();
-
-    indexingStrategyCatalog = new InMemoryIndexingStrategyCatalog();
 
     repository = createInMemoryRepository();
     searchEngine = createSearchEngine();
@@ -276,23 +269,6 @@ public abstract class SearchEngineContractTest {
     assertThat(result.get(0).name, is("John"));
   }
 
-  @Test(expected = NotConfiguredIndexingStrategyException.class)
-  public void notConfiguredIndexingStrategy() {
-
-    searchEngine = new SearchEngineImpl(repository, new IndexingStrategyCatalog() {
-      @Override
-      public IndexingStrategy get(Class aClass) {
-        return null;
-      }
-    }, null,null, objectIdFinder);
-
-    store(new User(1l, "John"));
-
-    List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("John")).returnAll().now();
-
-    assertThat(result.size(), is(0));
-  }
-
   @Test
   public void noMatchingResultsFromFullTextSearch() {
 
@@ -354,18 +330,16 @@ public abstract class SearchEngineContractTest {
   }
 
   @Test(expected = NotConfiguredIdConvertorException.class)
-  public void notConfiguredIdConvertor() {
+  public void notConfiguredIdConverter() {
 
-    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, new IdConvertorCatalog() {
+    searchEngine = SearchEngineFactory.create(entityLoader, new IdConverterCatalog() {
 
-      public IdConvertor getConvertor(Class aClass) {
+      public IdConverter getConverter(Class aClass) {
         return null;
       }
-    }, indexRegister, objectIdFinder);
+    });
 
     context.checking(new Expectations() {{
-      oneOf(indexRegister).register(with(any(Object.class)), with(any(IndexingStrategy.class)));
-      never(objectIdFinder);
       never(entityLoader);
     }});
 
@@ -382,21 +356,19 @@ public abstract class SearchEngineContractTest {
   @Test(expected = NotConfiguredIdConvertorException.class)
   public void missingIdConvertor() {
 
-    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, new IdConvertorCatalog() {
+    searchEngine = SearchEngineFactory.create(entityLoader, new IdConverterCatalog() {
       @Override
-      public IdConvertor getConvertor(Class aClass) {
+      public IdConverter getConverter(Class aClass) {
 
         if (aClass.equals(String.class)) {
-          return new StringIdConvertor();
+          return new StringIdConverter();
         }
 
         return null;
       }
-    }, indexRegister, objectIdFinder);
+    });
 
     context.checking(new Expectations() {{
-      oneOf(indexRegister).register(with(any(Object.class)), with(any(IndexingStrategy.class)));
-      never(objectIdFinder);
       never(entityLoader);
     }});
 
@@ -463,7 +435,7 @@ public abstract class SearchEngineContractTest {
 
     store(new User(1l, "John"));
 
-    searchEngine.delete(User.class.getSimpleName(), Lists.newArrayList(1l));
+    searchEngine.delete("UserIndex", Lists.newArrayList(1l));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
             .where("name", SearchFilters.is("John"))
@@ -479,7 +451,8 @@ public abstract class SearchEngineContractTest {
     store(new User(1l, "John"));
     store(new User(2l, "John"));
 
-    searchEngine.delete(User.class.getSimpleName(), Lists.newArrayList(1l, 2l));
+    //name of index is configured in SearchId annotation over User class
+    searchEngine.delete("UserIndex", Lists.newArrayList(1l, 2l));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
             .where("name", SearchFilters.is("John"))
@@ -488,6 +461,38 @@ public abstract class SearchEngineContractTest {
 
     assertThat(result.size(), is(0));
 
+  }
+
+  @Test
+  public void searchByWordSeparation() throws Exception {
+    store(new User(1l, "John", "Adams", "separate by words"));
+
+    List<User> result = searchEngine.search(User.class).where("description", SearchFilters.is("separate")).returnAll().now();
+
+    assertThat(result.size(), is(1));
+  }
+
+  @Test
+  public void shouldNotMatchWhenSearchByHalfWordWhereIsUsedWordSeparation() throws Exception {
+    store(new User(1l, "John", "Adams", "separate by words"));
+
+    List<User> result = searchEngine.search(User.class).where("description", SearchFilters.is("sepa")).returnAll().now();
+
+    assertThat(result.size(), is(0));
+  }
+
+  @Test
+  public void fullTextSearchForPropertyFromCollectionType() throws Exception {
+    List<String> tags = new ArrayList<String>(){{
+      add("example for");
+      add("test");
+    }};
+
+    store(new User(1l, tags));
+
+    List<User> result = searchEngine.search(User.class).where("tags", SearchFilters.is("ample")).returnAll().now();
+
+    assertThat(result.size(), is(1));
   }
 
   @Test
@@ -749,6 +754,63 @@ public abstract class SearchEngineContractTest {
     assertThat(result.get(1).id, is(equalTo(3l)));
   }
 
+  @Test
+  public void defaultSearchWithAnnotatedProperty() throws Exception {
+    Ticket ticket = new Ticket(1l, "Some Title", "Description");
+    ticket.setComment("some comment is add");
+    store(ticket);
+
+
+    List<Ticket> tickets = searchEngine.search(Ticket.class).where("comment", SearchFilters.is("some")).returnAll().now();
+
+    assertThat(tickets.size(), is(equalTo(1)));
+  }
+
+  @Test
+  public void fullWordSearchWithAnnotatedProperty() throws Exception {
+    store(new Ticket(1l, "Some Title", "Description"));
+
+    List<Ticket> tickets = searchEngine.search(Ticket.class).where("title", SearchFilters.is("Title")).returnAll().now();
+
+    assertThat(tickets.size(), is(equalTo(1)));
+    assertThat(tickets.get(0).getTitle(), is(equalTo("Some Title")));
+  }
+
+  @Test
+  public void fullTextSearchWithAnnotatedProperty() throws Exception {
+    store(new Ticket(1l, "Some Title", "Description"));
+
+    List<Ticket> tickets = searchEngine.search(Ticket.class).where("description", SearchFilters.is("desc")).returnAll().now();
+
+    assertThat(tickets.size(), is(equalTo(1)));
+    assertThat(tickets.get(0).getDescription(), is(equalTo("Description")));
+  }
+
+  @Test
+  public void searchByDateWithAnnotatedProperty() throws Exception {
+
+    Ticket ticket = new Ticket(1l, "Title", "Description");
+    ticket.setCreationDate(aNewDate(2013, 12, 20));
+
+    store(ticket);
+
+    List<Ticket> result = searchEngine.search(Ticket.class).where("creationDate", SearchFilters.lessThanOrEqualTo(aNewDate(2013, 12, 25))).returnAll().now();
+
+    assertThat(result.size(), is(1));
+  }
+
+  @Test
+  public void shouldNotFindResultsWhenSearchByIgnoredProperty() throws Exception {
+    Ticket ticket = new Ticket(1l, "Title", "Description");
+    ticket.setDetails("some info");
+
+    store(ticket);
+
+    List<Ticket> result = searchEngine.search(Ticket.class).where("details", SearchFilters.is("info")).returnAll().now();
+
+    assertThat(result.size(), is(0));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {
@@ -762,6 +824,14 @@ public abstract class SearchEngineContractTest {
     for (Employee employee : employees) {
       repository.store(employee.id, employee);
       searchEngine.register(employee);
+    }
+  }
+
+  private void store(Ticket... tickets) {
+
+    for (Ticket ticket : tickets) {
+      repository.store(ticket.getId(), ticket);
+      searchEngine.register(ticket);
     }
   }
 

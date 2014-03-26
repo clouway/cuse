@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class StringIdConvertor implements IdConvertor<String> {
+public class StringIdConverter implements IdConverter<String> {
 
   @Override
   public List<String> convert(List<String> values) {
@@ -18,5 +18,13 @@ public class StringIdConvertor implements IdConvertor<String> {
     }
 
     return result;
+  }
+
+  @Override
+  public String convertFrom(Object id) {
+    if(id != null && id instanceof String) {
+      return (String) id;
+    }
+    return null;
   }
 }

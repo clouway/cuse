@@ -1,11 +1,7 @@
 package com.clouway.cuse.gae;
 
-import com.clouway.cuse.Employee;
-import com.clouway.cuse.EmployeeIndexingStrategy;
 import com.clouway.cuse.InMemoryRepository;
 import com.clouway.cuse.SearchEngineContractTest;
-import com.clouway.cuse.User;
-import com.clouway.cuse.UserIndexingStrategy;
 import com.clouway.cuse.spi.EntityLoader;
 import com.clouway.cuse.spi.SearchEngine;
 import com.google.inject.Guice;
@@ -29,30 +25,13 @@ public class GaeCuseSearchEngineTest extends SearchEngineContractTest {
   public void setUp() {
     Injector injector = Guice.createInjector(
             // configure the provider to return always the same in memory implementation of the strategy catalog
-            new SearchApiCuseBindingModule(InMemoryRepository.class){
+            new SearchApiCuseBindingModule(InMemoryRepository.class) {
 
-      @Override
-      EntityLoader getEntityLoader(Injector injector) {
-        return inMemoryRepository;
-      }
-    },
-//        installing the module many times because of binding index classes to their index strategies
-//        in different modules - independent binding in each guice module - multibinding
-            new GaeSearchApiCuseModule(InMemoryRepository.class) {
-
-                                               @Override
-                                               protected void configureIndexStrategies() {
-                                                 objectIndex(User.class).through(UserIndexingStrategy.class);
-                                               }
-                                             },
-            new GaeSearchApiCuseModule(InMemoryRepository.class) {
-
-                                               @Override
-                                               protected void configureIndexStrategies() {
-                                                 objectIndex(Employee.class).through(EmployeeIndexingStrategy.class);
-                                               }
-                                             }
-
+              @Override
+              EntityLoader getEntityLoader(Injector injector) {
+                return inMemoryRepository;
+              }
+            }
     );
     injector.injectMembers(this);
     super.setUp();

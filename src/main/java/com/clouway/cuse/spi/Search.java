@@ -1,5 +1,6 @@
 package com.clouway.cuse.spi;
 
+import com.clouway.cuse.spi.annotations.SearchIndex;
 import com.clouway.cuse.spi.filters.SearchFilter;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class Search<T> {
 
     private EntityLoader entityLoader;
     private IndexingStrategyCatalog indexingStrategyCatalog;
-    private IdConvertorCatalog idConvertorCatalog;
+    private IdConverterCatalog idConverterCatalog;
     private final MatchedIdObjectFinder objectIdFinder;
 
     private final List<String> filters = new ArrayList<String>();
@@ -35,13 +36,13 @@ public class Search<T> {
       this.objectIdFinder = objectIdFinder;
     }
 
-    public SearchBuilder(Class<T> clazz, Class<T> idClazz, EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConvertorCatalog idConvertorCatalog,
+    public SearchBuilder(Class<T> clazz, Class<T> idClazz, EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConverterCatalog idConverterCatalog,
                          MatchedIdObjectFinder objectIdFinder) {
       this.clazz = clazz;
       this.idClazz = idClazz;
       this.entityLoader = entityLoader;
       this.indexingStrategyCatalog = indexingStrategyCatalog;
-      this.idConvertorCatalog = idConvertorCatalog;
+      this.idConverterCatalog = idConverterCatalog;
       this.objectIdFinder = objectIdFinder;
     }
 
@@ -68,7 +69,11 @@ public class Search<T> {
     }
 
     public SearchBuilder<T> inIndex(Class aClass) {
-      this.index = aClass.getSimpleName();
+      SearchIndex searchIndex = (SearchIndex) aClass.getAnnotation(SearchIndex.class);
+      if(searchIndex != null) {
+        this.index = searchIndex.name();
+      }
+
       return this;
     }
 
@@ -102,7 +107,7 @@ public class Search<T> {
 
       search.entityLoader = entityLoader;
       search.indexingStrategyCatalog = indexingStrategyCatalog;
-      search.idConvertorCatalog = idConvertorCatalog;
+      search.idConverterCatalog = idConverterCatalog;
 
       search.filters = filters;
       search.index = index;
@@ -123,7 +128,7 @@ public class Search<T> {
 
   private EntityLoader entityLoader;
   private IndexingStrategyCatalog indexingStrategyCatalog;
-  private IdConvertorCatalog idConvertorCatalog;
+  private IdConverterCatalog idConverterCatalog;
 
   private List<String> filters = new ArrayList<String>();
   private String index;
@@ -144,13 +149,13 @@ public class Search<T> {
 
     if (idClazz != null) {
 
-      IdConvertor convertor = idConvertorCatalog.getConvertor(idClazz);
+      IdConverter converter = idConverterCatalog.getConverter(idClazz);
 
-      if (convertor == null) {
+      if (converter == null) {
         throw new NotConfiguredIdConvertorException();
       }
 
-      return convertor.convert(results);
+      return converter.convert(results);
     }
 
     return entityLoader.loadAll(clazz, results);
