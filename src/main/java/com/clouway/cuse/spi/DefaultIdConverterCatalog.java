@@ -3,16 +3,16 @@ package com.clouway.cuse.spi;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class DefaultIdConvertorCatalog implements IdConvertorCatalog {
+public class DefaultIdConverterCatalog implements IdConverterCatalog {
 
-  public IdConvertor getConvertor(Class aClass) {
+  public IdConverter getConverter(Class aClass) {
 
     if (aClass.equals(String.class)) {
-      return new StringIdConvertor();
+      return new StringIdConverter();
     }
 
     if (aClass.equals(Long.class)) {
-      return new LongIdConvertor();
+      return new LongIdConverter();
     }
     return null;
   }

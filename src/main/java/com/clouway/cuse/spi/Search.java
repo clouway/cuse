@@ -18,7 +18,7 @@ public class Search<T> {
 
     private EntityLoader entityLoader;
     private IndexingStrategyCatalog indexingStrategyCatalog;
-    private IdConvertorCatalog idConvertorCatalog;
+    private IdConverterCatalog idConverterCatalog;
     private final MatchedIdObjectFinder objectIdFinder;
 
     private final List<String> filters = new ArrayList<String>();
@@ -35,13 +35,13 @@ public class Search<T> {
       this.objectIdFinder = objectIdFinder;
     }
 
-    public SearchBuilder(Class<T> clazz, Class<T> idClazz, EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConvertorCatalog idConvertorCatalog,
+    public SearchBuilder(Class<T> clazz, Class<T> idClazz, EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConverterCatalog idConverterCatalog,
                          MatchedIdObjectFinder objectIdFinder) {
       this.clazz = clazz;
       this.idClazz = idClazz;
       this.entityLoader = entityLoader;
       this.indexingStrategyCatalog = indexingStrategyCatalog;
-      this.idConvertorCatalog = idConvertorCatalog;
+      this.idConverterCatalog = idConverterCatalog;
       this.objectIdFinder = objectIdFinder;
     }
 
@@ -102,7 +102,7 @@ public class Search<T> {
 
       search.entityLoader = entityLoader;
       search.indexingStrategyCatalog = indexingStrategyCatalog;
-      search.idConvertorCatalog = idConvertorCatalog;
+      search.idConverterCatalog = idConverterCatalog;
 
       search.filters = filters;
       search.index = index;
@@ -123,7 +123,7 @@ public class Search<T> {
 
   private EntityLoader entityLoader;
   private IndexingStrategyCatalog indexingStrategyCatalog;
-  private IdConvertorCatalog idConvertorCatalog;
+  private IdConverterCatalog idConverterCatalog;
 
   private List<String> filters = new ArrayList<String>();
   private String index;
@@ -144,7 +144,7 @@ public class Search<T> {
 
     if (idClazz != null) {
 
-      IdConvertor convertor = idConvertorCatalog.getConvertor(idClazz);
+      IdConverter convertor = idConverterCatalog.getConverter(idClazz);
 
       if (convertor == null) {
         throw new NotConfiguredIdConvertorException();

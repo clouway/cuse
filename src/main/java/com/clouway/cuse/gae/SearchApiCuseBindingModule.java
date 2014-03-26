@@ -14,7 +14,7 @@ public class SearchApiCuseBindingModule extends AbstractModule {
 
   private final Class<? extends EntityLoader> entityLoaderClazz;
 
-  private IndexingStrategyCatalogImpl indexingStrategyCatalog = new IndexingStrategyCatalogImpl();
+  private IndexingStrategyCatalogImpl indexingStrategyCatalog;
 
 
   protected SearchApiCuseBindingModule(Class<? extends EntityLoader> entityLoaderClazz) {
@@ -24,13 +24,17 @@ public class SearchApiCuseBindingModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(SearchEngine.class).to(SearchEngineImpl.class);
-    bind(IdConvertorCatalog.class).to(DefaultIdConvertorCatalog.class);
+    bind(IdConverterCatalog.class).to(DefaultIdConverterCatalog.class);
     bind(IndexRegister.class).to(GaeSearchApiIndexRegister.class);
     bind(MatchedIdObjectFinder.class).to(GaeSearchApiMatchedIdObjectFinder.class);
   }
 
   @Provides
-  IndexingStrategyCatalog getIndexingStrategyCatalog(Injector injector, Set<GaeSearchApiCuseModule.IndexStrategyMetadata> indexStrategyMetadatas){
+  IndexingStrategyCatalog getIndexingStrategyCatalog(IndexStrategyFactory indexStrategyFactory, Injector injector, Set<GaeSearchApiCuseModule.IndexStrategyMetadata> indexStrategyMetadatas){
+
+    if(indexingStrategyCatalog == null) {
+      indexingStrategyCatalog = new IndexingStrategyCatalogImpl(indexStrategyFactory);
+    }
 
     for (GaeSearchApiCuseModule.IndexStrategyMetadata indexStrategyMetadata : indexStrategyMetadatas) {
       IndexingStrategy<?> indexingStrategy = injector.getInstance(indexStrategyMetadata.getStrategyClazz());

@@ -11,16 +11,16 @@ public class SearchEngineImpl implements SearchEngine {
 
   private final EntityLoader entityLoader;
   private final IndexingStrategyCatalog indexingStrategyCatalog;
-  private final IdConvertorCatalog idConvertorCatalog;
+  private final IdConverterCatalog idConverterCatalog;
   private final IndexRegister indexRegister;
   private final MatchedIdObjectFinder objectIdFinder;
 
   @Inject
-  public SearchEngineImpl(EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConvertorCatalog idConvertorCatalog,
+  public SearchEngineImpl(EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConverterCatalog idConverterCatalog,
                           IndexRegister indexRegister, MatchedIdObjectFinder objectIdFinder) {
     this.entityLoader = entityLoader;
     this.indexingStrategyCatalog = indexingStrategyCatalog;
-    this.idConvertorCatalog = idConvertorCatalog;
+    this.idConverterCatalog = idConverterCatalog;
     this.indexRegister = indexRegister;
     this.objectIdFinder = objectIdFinder;
   }
@@ -45,10 +45,10 @@ public class SearchEngineImpl implements SearchEngine {
   @Override
   public <T> Search.SearchBuilder<T> searchIds(Class<T> idClass) {
 
-    if (idConvertorCatalog.getConvertor(idClass) == null) {
+    if (idConverterCatalog.getConverter(idClass) == null) {
       throw new NotConfiguredIdConvertorException();
     }
-    return new Search.SearchBuilder<T>(idClass, idClass, entityLoader, indexingStrategyCatalog, idConvertorCatalog, objectIdFinder);
+    return new Search.SearchBuilder<T>(idClass, idClass, entityLoader, indexingStrategyCatalog, idConverterCatalog, objectIdFinder);
   }
 
   @Override
