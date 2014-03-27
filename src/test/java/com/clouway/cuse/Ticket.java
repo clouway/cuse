@@ -5,6 +5,8 @@ import com.clouway.cuse.spi.annotations.FullWordSearch;
 import com.clouway.cuse.spi.annotations.SearchId;
 import com.clouway.cuse.spi.annotations.SearchIndex;
 
+import java.util.Date;
+
 /**
  * @author Georgi Georgiev (GeorgievJon@gmail.com)
  */
@@ -19,6 +21,9 @@ public class Ticket {
 
   @FullTextSearch
   private String description;
+
+  @FullWordSearch
+  private Date creationDate;
 
   public Ticket(Long id, String title, String description) {
     this.id = id;
@@ -36,5 +41,9 @@ public class Ticket {
 
   public String getDescription() {
     return description;
+  }
+
+  public void setCreationDate(Date creationDate) {
+    this.creationDate = creationDate;
   }
 }

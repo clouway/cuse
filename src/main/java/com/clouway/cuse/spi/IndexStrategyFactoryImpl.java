@@ -1,28 +1,32 @@
 package com.clouway.cuse.spi;
 
-import com.clouway.cuse.spi.annotations.FullTextSearch;
-import com.clouway.cuse.spi.annotations.FullWordSearch;
 import com.clouway.cuse.spi.annotations.SearchId;
 import com.clouway.cuse.spi.annotations.SearchIndex;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.clouway.cuse.spi.IndexingSchema.aNewIndexingSchema;
 
 /**
  * @author Georgi Georgiev (GeorgievJon@gmail.com)
  */
-public class IndexStrategyFactoryImpl implements IndexStrategyFactory {
+class IndexStrategyFactoryImpl implements IndexStrategyFactory {
 
-  private IdConverterCatalog idConverterCatalog;
+  private final Provider<IdConverterCatalog> idConverterCatalog;
+  private final Provider<SearchAnnotationsCatalog> searchAnnotationsCatalog;
 
   @Inject
-  public IndexStrategyFactoryImpl(IdConverterCatalog idConverterCatalog) {
+  public IndexStrategyFactoryImpl(
+          Provider<IdConverterCatalog> idConverterCatalog,
+          Provider<SearchAnnotationsCatalog> searchAnnotationsCatalog) {
     this.idConverterCatalog = idConverterCatalog;
+    this.searchAnnotationsCatalog = searchAnnotationsCatalog;
   }
 
   @Override
@@ -62,14 +66,15 @@ public class IndexStrategyFactoryImpl implements IndexStrategyFactory {
         try {
           field.setAccessible(true);
           Object id = field.get(instance);
-          IdConverter converter = idConverterCatalog.getConverter(field.getType());
+          IdConverter converter = idConverterCatalog.get().getConverter(field.getType());
           return converter.convertFrom(id);
         } catch (IllegalAccessException e) {
           e.printStackTrace();
         }
       }
     }
-    return null;
+
+    throw new IllegalArgumentException("Missing search id annotation for class : " + instance.getClass().getName());
   }
 
   private IndexingSchema getIndexSchema(Class<?> indexClazz) {
@@ -79,8 +84,15 @@ public class IndexStrategyFactoryImpl implements IndexStrategyFactory {
     Field[] fields = indexClazz.getDeclaredFields();
     for (Field field : fields) {
 
-      fillPropertiesWithAnnotation(fullWordSearchList, field, FullWordSearch.class);
-      fillPropertiesWithAnnotation(fullTextSearchList, field, FullTextSearch.class);
+      Set<SearchAnnotation> searchAnnotations = searchAnnotationsCatalog.get().getSearchAnnotations();
+
+      for (SearchAnnotation searchAnnotation : searchAnnotations) {
+        if(searchAnnotation.isFullTextSearch()) {
+          fillPropertiesWithAnnotation(fullTextSearchList, field, searchAnnotation.getAnnotationClass());
+        }else {
+          fillPropertiesWithAnnotation(fullWordSearchList, field, searchAnnotation.getAnnotationClass());
+        }
+      }
     }
 
     return aNewIndexingSchema()

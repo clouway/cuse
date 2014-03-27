@@ -4,6 +4,7 @@ import com.clouway.cuse.spi.*;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 
 import java.util.Set;
 
@@ -47,6 +48,12 @@ public class SearchApiCuseBindingModule extends AbstractModule {
   @Provides
   EntityLoader getEntityLoader(Injector injector) {
     return injector.getInstance(entityLoaderClazz);
+  }
+
+  @Provides
+  @Singleton
+  public SearchAnnotationsCatalog getSearchAnnotationsCatalog() {
+    return new InMemorySearchAnnotationsCatalog();
   }
 
   @Override

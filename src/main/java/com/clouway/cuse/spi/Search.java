@@ -144,13 +144,13 @@ public class Search<T> {
 
     if (idClazz != null) {
 
-      IdConverter convertor = idConverterCatalog.getConverter(idClazz);
+      IdConverter converter = idConverterCatalog.getConverter(idClazz);
 
-      if (convertor == null) {
+      if (converter == null) {
         throw new NotConfiguredIdConvertorException();
       }
 
-      return convertor.convert(results);
+      return converter.convert(results);
     }
 
     return entityLoader.loadAll(clazz, results);

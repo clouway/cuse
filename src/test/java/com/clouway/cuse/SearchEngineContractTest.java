@@ -769,6 +769,19 @@ public abstract class SearchEngineContractTest {
     assertThat(tickets.get(0).getDescription(), is(equalTo("Description")));
   }
 
+  @Test
+  public void searchByDateWithAnnotatedProperty() throws Exception {
+
+    Ticket ticket = new Ticket(1l, "Some Title", "Description");
+    ticket.setCreationDate(aNewDate(2013, 12, 20));
+
+    store(ticket);
+
+    List<Ticket> result = searchEngine.search(Ticket.class).where("creationDate", SearchFilters.lessThanOrEqualTo(aNewDate(2013, 12, 25))).returnAll().now();
+
+    assertThat(result.size(), is(1));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {
