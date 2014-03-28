@@ -491,6 +491,24 @@ public abstract class SearchEngineContractTest {
   }
 
   @Test
+  public void searchByWordSeparation() throws Exception {
+    store(new User(1l, "John", "Adams", "separate by words"));
+
+    List<User> result = searchEngine.search(User.class).where("description", SearchFilters.is("separate")).returnAll().now();
+
+    assertThat(result.size(), is(1));
+  }
+
+  @Test
+  public void shouldNotMatchWhenSearchByHalfWordWhereIsUsedWordSeparation() throws Exception {
+    store(new User(1l, "John", "Adams", "separate by words"));
+
+    List<User> result = searchEngine.search(User.class).where("description", SearchFilters.is("sepa")).returnAll().now();
+
+    assertThat(result.size(), is(0));
+  }
+
+  @Test
   public void searchByFieldWithMultipleValuesOneOfWhichMatchesAnotherIndexedFieldValue() {
 
     store(new Employee(1l, "John", "Adams"));
@@ -750,6 +768,18 @@ public abstract class SearchEngineContractTest {
   }
 
   @Test
+  public void defaultSearchWithAnnotatedProperty() throws Exception {
+    Ticket ticket = new Ticket(1l, "Some Title", "Description");
+    ticket.setComment("some comment is add");
+    store(ticket);
+
+
+    List<Ticket> tickets = searchEngine.search(Ticket.class).where("comment", SearchFilters.is("some")).returnAll().now();
+
+    assertThat(tickets.size(), is(equalTo(1)));
+  }
+
+  @Test
   public void fullWordSearchWithAnnotatedProperty() throws Exception {
     store(new Ticket(1l, "Some Title", "Description"));
 
@@ -772,7 +802,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByDateWithAnnotatedProperty() throws Exception {
 
-    Ticket ticket = new Ticket(1l, "Some Title", "Description");
+    Ticket ticket = new Ticket(1l, "Title", "Description");
     ticket.setCreationDate(aNewDate(2013, 12, 20));
 
     store(ticket);
@@ -780,6 +810,18 @@ public abstract class SearchEngineContractTest {
     List<Ticket> result = searchEngine.search(Ticket.class).where("creationDate", SearchFilters.lessThanOrEqualTo(aNewDate(2013, 12, 25))).returnAll().now();
 
     assertThat(result.size(), is(1));
+  }
+
+  @Test
+  public void shouldNotSearchForIgnoredProperties() throws Exception {
+    Ticket ticket = new Ticket(1l, "Title", "Description");
+    ticket.setDetails("some info");
+
+    store(ticket);
+
+    List<Ticket> result = searchEngine.search(Ticket.class).where("details", SearchFilters.is("info")).returnAll().now();
+
+    assertThat(result.size(), is(0));
   }
 
   private void store(User... users) {

@@ -5,11 +5,7 @@ import com.clouway.cuse.spi.annotations.SearchIndex;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import static com.clouway.cuse.spi.IndexingSchema.aNewIndexingSchema;
 
@@ -19,14 +15,14 @@ import static com.clouway.cuse.spi.IndexingSchema.aNewIndexingSchema;
 class IndexStrategyFactoryImpl implements IndexStrategyFactory {
 
   private final Provider<IdConverterCatalog> idConverterCatalog;
-  private final Provider<SearchAnnotationsCatalog> searchAnnotationsCatalog;
+  private final Provider<IndexSchemaFillActionsCatalog> indexSchemaFillerActionsCatalog;
 
   @Inject
   public IndexStrategyFactoryImpl(
           Provider<IdConverterCatalog> idConverterCatalog,
-          Provider<SearchAnnotationsCatalog> searchAnnotationsCatalog) {
+          Provider<IndexSchemaFillActionsCatalog> indexSchemaFillerActionsCatalog) {
     this.idConverterCatalog = idConverterCatalog;
-    this.searchAnnotationsCatalog = searchAnnotationsCatalog;
+    this.indexSchemaFillerActionsCatalog = indexSchemaFillerActionsCatalog;
   }
 
   @Override
@@ -78,37 +74,19 @@ class IndexStrategyFactoryImpl implements IndexStrategyFactory {
   }
 
   private IndexingSchema getIndexSchema(Class<?> indexClazz) {
-    List<String> fullWordSearchList = new ArrayList<String>();
-    List<String> fullTextSearchList = new ArrayList<String>();
+    IndexingSchema.IndexingSchemaBuilder indexingSchemaBuilder = aNewIndexingSchema();
 
     Field[] fields = indexClazz.getDeclaredFields();
     for (Field field : fields) {
 
-      Set<SearchAnnotation> searchAnnotations = searchAnnotationsCatalog.get().getSearchAnnotations();
-
-      for (SearchAnnotation searchAnnotation : searchAnnotations) {
-        if(searchAnnotation.isFullTextSearch()) {
-          fillPropertiesWithAnnotation(fullTextSearchList, field, searchAnnotation.getAnnotationClass());
-        }else {
-          fillPropertiesWithAnnotation(fullWordSearchList, field, searchAnnotation.getAnnotationClass());
-        }
+      IndexSchemaFillAction action = indexSchemaFillerActionsCatalog.get().getFillAction(field.getAnnotations());
+      if(action != null) {
+        action.fill(indexingSchemaBuilder, field.getName());
+      } else {
+        indexingSchemaBuilder.fields(field.getName());
       }
     }
 
-    return aNewIndexingSchema()
-            .fields(convertToArray(fullWordSearchList))
-            .fullTextFields(convertToArray(fullTextSearchList))
-            .build();
-  }
-
-  private void fillPropertiesWithAnnotation(List<String> propertyList, Field field, Class<? extends Annotation> annotationClass) {
-    Annotation annotatedProperty = field.getAnnotation(annotationClass);
-    if(annotatedProperty != null) {
-      propertyList.add(field.getName());
-    }
-  }
-
-  private String[] convertToArray(List<String> propertyList) {
-    return propertyList.toArray(new String[propertyList.size()]);
+    return indexingSchemaBuilder.build();
   }
 }

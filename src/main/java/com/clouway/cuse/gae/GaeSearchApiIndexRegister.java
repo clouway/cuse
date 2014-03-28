@@ -22,12 +22,9 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
   @Override
   public void register(Object instance, IndexingStrategy strategy) {
     String documentId = strategy.getId(instance);
-
     IndexingSchema indexingSchema = strategy.getIndexingSchema();
-    List<String> fields = indexingSchema.getFields();
-    List<String> fullTextFields = indexingSchema.getFullText();
 
-    Document document = buildDocument(instance, documentId, fields, fullTextFields);
+    Document document = buildDocument(instance, documentId, indexingSchema);
 
     addDocumentInIndex(strategy.getIndexName(), document);
   }
@@ -49,7 +46,7 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
     loadIndex(indexName).put(document);
   }
 
-  private Document buildDocument(Object instance, String documentId, List<String> fields, List<String> fullTextFields) {
+  private Document buildDocument(Object instance, String documentId, IndexingSchema indexingSchema) {
 
     Document.Builder documentBuilder = Document.newBuilder().setId(documentId);
 
@@ -57,7 +54,7 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
 
       Object fieldValue = getFieldValue(instance, field);
 
-      if (fields.contains(field.getName())) {
+      if (indexingSchema.getFields().contains(field.getName())) {
 
         if (field.getType().equals(Date.class)) {
           buildDateField(documentBuilder, field, (Date) fieldValue);
@@ -66,11 +63,20 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
         }
       }
 
-      if (fullTextFields.contains(field.getName())) {
+      if (indexingSchema.getFullText().contains(field.getName())) {
 
         Set<String> fieldValues = new IndexWriter().createIndex(String.valueOf(fieldValue));
 
         for (String value : fieldValues) {
+          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(value));
+        }
+      }
+
+      if (indexingSchema.getWordFields().contains(field.getName()) && fieldValue != null && fieldValue instanceof String) {
+        String stringValue = (String) fieldValue;
+        String[] splitValues = stringValue.split(" ");
+
+        for (String value : splitValues) {
           documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(value));
         }
       }

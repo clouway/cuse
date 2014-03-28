@@ -1,7 +1,6 @@
 package com.clouway.cuse.spi;
 
 import com.clouway.cuse.spi.annotations.FullTextSearch;
-import com.clouway.cuse.spi.annotations.FullWordSearch;
 import com.clouway.cuse.spi.annotations.SearchId;
 import com.clouway.cuse.spi.annotations.SearchIndex;
 import com.google.inject.util.Providers;
@@ -12,13 +11,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-
-//import com.google.inject.Provides;
 
 /**
  * @author Georgi Georgiev (GeorgievJon@gmail.com)
@@ -35,8 +33,24 @@ public class IndexStrategyFactoryImplTest {
 
   @Before
   public void setUp() throws Exception {
-    SearchAnnotationsCatalog searchAnnotationsCatalog = new InMemorySearchAnnotationsCatalog();
-    factory = new IndexStrategyFactoryImpl(Providers.of(idConverterCatalog), Providers.of(searchAnnotationsCatalog));
+    IndexSchemaFillActionsCatalog indexSchemaFillActionsCatalog = new IndexSchemaFillActionsCatalog() {
+      @Override
+      public IndexSchemaFillAction getFillAction(Annotation[] annotations) {
+        for (Annotation annotation : annotations) {
+          if (FullTextSearch.class.getSimpleName().equals(annotation.annotationType().getSimpleName())) {
+            return new IndexSchemaFillAction() {
+              @Override
+              public void fill(IndexingSchema.IndexingSchemaBuilder indexingSchemaBuilder, String propertyName) {
+                indexingSchemaBuilder.fullTextFields(propertyName);
+              }
+            };
+          }
+        }
+        return null;
+      }
+    };
+
+    factory = new IndexStrategyFactoryImpl(Providers.of(idConverterCatalog), Providers.of(indexSchemaFillActionsCatalog));
   }
 
   @Test
@@ -52,7 +66,7 @@ public class IndexStrategyFactoryImplTest {
 
     context.checking(new Expectations() {{
       oneOf(idConverterCatalog).getConverter(Long.class);
-      will(returnValue(new IdConverter<Long>(){
+      will(returnValue(new IdConverter<Long>() {
         @Override
         public List<Long> convert(List<String> values) {
           return null;
@@ -72,26 +86,6 @@ public class IndexStrategyFactoryImplTest {
     assertThat("entity id is not correct", entityId, is("100"));
   }
 
-  @Test
-  public void getFullWordSearchProperties() throws Exception {
-
-    IndexingStrategy indexingStrategy = factory.create(TestEntity.class);
-
-    List<String> wordSearchProperties = indexingStrategy.getIndexingSchema().getFields();
-
-    assertThat("word search properties are not correct", wordSearchProperties, is(Arrays.asList("wordProperty", "anotherWordProperty")));
-  }
-
-  @Test
-  public void getFullTextSearchProperties() throws Exception {
-
-    IndexingStrategy indexingStrategy = factory.create(TestEntity.class);
-
-    List<String> fullTextSearchProperties = indexingStrategy.getIndexingSchema().getFullText();
-
-    assertThat("full test search properties are not correct", fullTextSearchProperties, is(Arrays.asList("fullTextProperty", "anotherFullTextProperty")));
-  }
-
   @Test(expected = IllegalArgumentException.class)
   public void trowExceptionWhenMissingSearchIdAnnotatedProperty() throws Exception {
 
@@ -99,23 +93,26 @@ public class IndexStrategyFactoryImplTest {
     indexingStrategy.getId(new TestIdEntity(20l));
   }
 
+  @Test
+  public void addAnnotatedPropertyToIndexSchema() throws Exception {
+    IndexingStrategy indexingStrategy = factory.create(TestEntity.class);
+
+    List<String> defaultSearchProperties = indexingStrategy.getIndexingSchema().getFields();
+    List<String> searchProperties = indexingStrategy.getIndexingSchema().getFullText();
+
+    assertThat("incorrect default schema properties", defaultSearchProperties, is(Arrays.asList("entityId", "defaultProperty")));
+    assertThat("incorrect index schema properties", searchProperties, is(Arrays.asList("searchProperty")));
+  }
   @SearchIndex(name = "IndexName")
-  class TestEntity {
+  static class TestEntity {
 
     @SearchId
     private Long entityId;
 
-    @FullWordSearch
-    private String wordProperty = "some";
-
-    @FullWordSearch
-    private String anotherWordProperty = "some some";
-
     @FullTextSearch
-    private String fullTextProperty = "full text";
+    private String searchProperty = "full text";
 
-    @FullTextSearch
-    private String anotherFullTextProperty = "full text search";
+    private String defaultProperty = "default";
 
     TestEntity(Long entityId) {
       this.entityId = entityId;

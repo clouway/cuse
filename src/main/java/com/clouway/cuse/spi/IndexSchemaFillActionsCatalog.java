@@ -5,10 +5,7 @@ import java.lang.annotation.Annotation;
 /**
  * @author Georgi Georgiev (GeorgievJon@gmail.com)
  */
-public interface SearchAnnotation {
+public interface IndexSchemaFillActionsCatalog {
 
-  Class<? extends Annotation> getAnnotationClass();
-
-  boolean isFullTextSearch();
-
+  IndexSchemaFillAction getFillAction(Annotation[] annotations);
 }

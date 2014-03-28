@@ -12,14 +12,14 @@ public class TestingStrategyCatalog extends IndexingStrategyCatalogImpl {
   public TestingStrategyCatalog() {
     super(new IndexStrategyFactoryImpl(
                     Providers.<IdConverterCatalog>of(new DefaultIdConverterCatalog()),
-                    Providers.<SearchAnnotationsCatalog>of(new InMemorySearchAnnotationsCatalog()))
+                    Providers.<IndexSchemaFillActionsCatalog>of(new InMemoryIndexSchemaFillActionsCatalog()))
     );
   }
 
   public TestingStrategyCatalog(IdConverterCatalog idConverterCatalog) {
     super(new IndexStrategyFactoryImpl(
                     Providers.of(idConverterCatalog),
-                    Providers.<SearchAnnotationsCatalog>of(new InMemorySearchAnnotationsCatalog()))
+                    Providers.<IndexSchemaFillActionsCatalog>of(new InMemoryIndexSchemaFillActionsCatalog()))
     );
   }
 }

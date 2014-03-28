@@ -3,6 +3,8 @@ package com.clouway.cuse;
 import com.clouway.cuse.spi.IndexingSchema;
 import com.clouway.cuse.spi.IndexingStrategy;
 
+import static com.clouway.cuse.spi.IndexingSchema.aNewIndexingSchema;
+
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
@@ -19,6 +21,10 @@ public class UserIndexingStrategy implements IndexingStrategy<User> {
 
   @Override
   public IndexingSchema getIndexingSchema() {
-    return IndexingSchema.aNewIndexingSchema().fields("family").fullTextFields("name").build();
+    return aNewIndexingSchema()
+            .fields("family")
+            .fullWordFields("description")
+            .fullTextFields("name")
+            .build();
   }
 }
