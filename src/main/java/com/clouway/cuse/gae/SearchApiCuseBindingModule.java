@@ -52,7 +52,7 @@ public class SearchApiCuseBindingModule extends AbstractModule {
 
   @Provides
   @Singleton
-  public IndexSchemaFillActionsCatalog getSearchAnnotationsCatalog() {
+  public IndexSchemaFillActionsCatalog getIndexSchemaFillActionsCatalog() {
     return new InMemoryIndexSchemaFillActionsCatalog();
   }
 

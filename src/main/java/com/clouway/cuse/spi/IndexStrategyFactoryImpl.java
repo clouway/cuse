@@ -27,10 +27,10 @@ class IndexStrategyFactoryImpl implements IndexStrategyFactory {
 
   @Override
   public IndexingStrategy create(final Class<?> indexClazz) {
-    SearchIndex annotation = indexClazz.getAnnotation(SearchIndex.class);
+    SearchIndex searchIndex = indexClazz.getAnnotation(SearchIndex.class);
 
-    if(annotation != null) {
-      final String indexName = annotation.name();
+    if(searchIndex != null) {
+      final String indexName = searchIndex.name();
 
       return new IndexingStrategy() {
 

@@ -813,7 +813,7 @@ public abstract class SearchEngineContractTest {
   }
 
   @Test
-  public void shouldNotSearchForIgnoredProperties() throws Exception {
+  public void shouldNotFindResultsWhenSearchByIgnoredProperty() throws Exception {
     Ticket ticket = new Ticket(1l, "Title", "Description");
     ticket.setDetails("some info");
 
