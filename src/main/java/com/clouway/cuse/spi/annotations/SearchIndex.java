@@ -5,6 +5,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
+ * Declare index name for given class <br/>
+ * Using
+ * <pre>
+ *   @ SearchIndex(name = "FooIndex")
+ *   class Foo {
+ *     ...
+ *   }
+ *
+ * </pre>
+ *
  * @author Georgi Georgiev (GeorgievJon@gmail.com)
  */
 @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)

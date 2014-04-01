@@ -1,13 +1,25 @@
 package com.clouway.cuse;
 
+import com.clouway.cuse.spi.annotations.FullTextSearch;
+import com.clouway.cuse.spi.annotations.FullWordSearch;
+import com.clouway.cuse.spi.annotations.SearchId;
+import com.clouway.cuse.spi.annotations.SearchIndex;
+
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
+@SearchIndex(name = "UserIndex")
 public class User {
 
+  @SearchId
   public Long id;
+
+  @FullTextSearch
   public String name;
+
   private String family;
+
+  @FullWordSearch
   private String description;
 
   public User(Long id) {

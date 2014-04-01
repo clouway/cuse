@@ -1,5 +1,6 @@
 package com.clouway.cuse.spi;
 
+import com.clouway.cuse.spi.annotations.SearchIndex;
 import com.clouway.cuse.spi.filters.SearchFilter;
 
 import java.util.ArrayList;
@@ -68,7 +69,11 @@ public class Search<T> {
     }
 
     public SearchBuilder<T> inIndex(Class aClass) {
-      this.index = aClass.getSimpleName();
+      SearchIndex searchIndex = (SearchIndex) aClass.getAnnotation(SearchIndex.class);
+      if(searchIndex != null) {
+        this.index = searchIndex.name();
+      }
+
       return this;
     }
 

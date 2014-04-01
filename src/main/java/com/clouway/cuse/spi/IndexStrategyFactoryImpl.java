@@ -63,6 +63,9 @@ class IndexStrategyFactoryImpl implements IndexStrategyFactory {
           field.setAccessible(true);
           Object id = field.get(instance);
           IdConverter converter = idConverterCatalog.get().getConverter(field.getType());
+          if(converter == null) {
+            throw new NotConfiguredIdConvertorException();
+          }
           return converter.convertFrom(id);
         } catch (IllegalAccessException e) {
           e.printStackTrace();

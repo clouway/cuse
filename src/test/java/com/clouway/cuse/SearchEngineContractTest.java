@@ -41,12 +41,6 @@ public abstract class SearchEngineContractTest {
 
   private EntityLoader entityLoader = context.mock(EntityLoader.class);
 
-  private IndexingStrategyCatalog indexingStrategyCatalog;
-
-  private IndexRegister indexRegister = context.mock(IndexRegister.class);
-
-  private MatchedIdObjectFinder objectIdFinder = context.mock(MatchedIdObjectFinder.class);
-
   protected abstract SearchEngine createSearchEngine();
 
   protected abstract InMemoryRepository createInMemoryRepository();
@@ -55,8 +49,6 @@ public abstract class SearchEngineContractTest {
   public void setUp() {
 
     helper.setUp();
-
-    indexingStrategyCatalog = new InMemoryIndexingStrategyCatalog();
 
     repository = createInMemoryRepository();
     searchEngine = createSearchEngine();
@@ -276,23 +268,6 @@ public abstract class SearchEngineContractTest {
     assertThat(result.get(0).name, is("John"));
   }
 
-  @Test(expected = NotConfiguredIndexingStrategyException.class)
-  public void notConfiguredIndexingStrategy() {
-
-    searchEngine = new SearchEngineImpl(repository, new IndexingStrategyCatalog() {
-      @Override
-      public IndexingStrategy get(Class aClass) {
-        return null;
-      }
-    }, null,null, objectIdFinder);
-
-    store(new User(1l, "John"));
-
-    List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("John")).returnAll().now();
-
-    assertThat(result.size(), is(0));
-  }
-
   @Test
   public void noMatchingResultsFromFullTextSearch() {
 
@@ -354,18 +329,16 @@ public abstract class SearchEngineContractTest {
   }
 
   @Test(expected = NotConfiguredIdConvertorException.class)
-  public void notConfiguredIdConvertor() {
+  public void notConfiguredIdConverter() {
 
-    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, new IdConverterCatalog() {
+    searchEngine = SearchEngineFactory.create(entityLoader, new IdConverterCatalog() {
 
       public IdConverter getConverter(Class aClass) {
         return null;
       }
-    }, indexRegister, objectIdFinder);
+    });
 
     context.checking(new Expectations() {{
-      oneOf(indexRegister).register(with(any(Object.class)), with(any(IndexingStrategy.class)));
-      never(objectIdFinder);
       never(entityLoader);
     }});
 
@@ -382,7 +355,7 @@ public abstract class SearchEngineContractTest {
   @Test(expected = NotConfiguredIdConvertorException.class)
   public void missingIdConvertor() {
 
-    searchEngine = new SearchEngineImpl(entityLoader, indexingStrategyCatalog, new IdConverterCatalog() {
+    searchEngine = SearchEngineFactory.create(entityLoader, new IdConverterCatalog() {
       @Override
       public IdConverter getConverter(Class aClass) {
 
@@ -392,11 +365,9 @@ public abstract class SearchEngineContractTest {
 
         return null;
       }
-    }, indexRegister, objectIdFinder);
+    });
 
     context.checking(new Expectations() {{
-      oneOf(indexRegister).register(with(any(Object.class)), with(any(IndexingStrategy.class)));
-      never(objectIdFinder);
       never(entityLoader);
     }});
 
@@ -463,7 +434,7 @@ public abstract class SearchEngineContractTest {
 
     store(new User(1l, "John"));
 
-    searchEngine.delete(User.class.getSimpleName(), Lists.newArrayList(1l));
+    searchEngine.delete("UserIndex", Lists.newArrayList(1l));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
             .where("name", SearchFilters.is("John"))
@@ -479,7 +450,8 @@ public abstract class SearchEngineContractTest {
     store(new User(1l, "John"));
     store(new User(2l, "John"));
 
-    searchEngine.delete(User.class.getSimpleName(), Lists.newArrayList(1l, 2l));
+    //name of index is configured in SearchId annotation over User class
+    searchEngine.delete("UserIndex", Lists.newArrayList(1l, 2l));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
             .where("name", SearchFilters.is("John"))

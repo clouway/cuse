@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class IndexingStrategyCatalogImpl implements IndexingStrategyCatalog {
+class IndexingStrategyCatalogImpl implements IndexingStrategyCatalog {
 
   private IndexStrategyFactory indexStrategyFactory;
 
@@ -14,10 +14,6 @@ public class IndexingStrategyCatalogImpl implements IndexingStrategyCatalog {
 
   public IndexingStrategyCatalogImpl(IndexStrategyFactory indexStrategyFactory) {
     this.indexStrategyFactory = indexStrategyFactory;
-  }
-
-  public void put(Class<?> indexClazz, IndexingStrategy<?> strategyClazz){
-    map.put(indexClazz,strategyClazz);
   }
 
   @Override

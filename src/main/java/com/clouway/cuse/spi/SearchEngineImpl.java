@@ -1,13 +1,11 @@
 package com.clouway.cuse.spi;
 
-import com.google.inject.Inject;
-
 import java.util.List;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class SearchEngineImpl implements SearchEngine {
+class SearchEngineImpl implements SearchEngine {
 
   private final EntityLoader entityLoader;
   private final IndexingStrategyCatalog indexingStrategyCatalog;
@@ -15,12 +13,14 @@ public class SearchEngineImpl implements SearchEngine {
   private final IndexRegister indexRegister;
   private final MatchedIdObjectFinder objectIdFinder;
 
-  @Inject
-  public SearchEngineImpl(EntityLoader entityLoader, IndexingStrategyCatalog indexingStrategyCatalog, IdConverterCatalog idConverterCatalog,
-                          IndexRegister indexRegister, MatchedIdObjectFinder objectIdFinder) {
+  public SearchEngineImpl(EntityLoader entityLoader,
+                          IdConverterCatalog idConverterCatalog,
+                          IndexingStrategyCatalog indexingStrategyCatalog,
+                          IndexRegister indexRegister,
+                          MatchedIdObjectFinder objectIdFinder) {
     this.entityLoader = entityLoader;
-    this.indexingStrategyCatalog = indexingStrategyCatalog;
     this.idConverterCatalog = idConverterCatalog;
+    this.indexingStrategyCatalog = indexingStrategyCatalog;
     this.indexRegister = indexRegister;
     this.objectIdFinder = objectIdFinder;
   }
