@@ -12,13 +12,13 @@ import static com.clouway.cuse.spi.IndexingSchema.aNewIndexingSchema;
 /**
  * @author Georgi Georgiev (GeorgievJon@gmail.com)
  */
-class IndexStrategyFactoryImpl implements IndexStrategyFactory {
+class AnnotatedIndexStrategyFactory implements IndexStrategyFactory {
 
   private final Provider<IdConverterCatalog> idConverterCatalog;
   private final Provider<IndexSchemaFillActionsCatalog> indexSchemaFillerActionsCatalog;
 
   @Inject
-  public IndexStrategyFactoryImpl(
+  public AnnotatedIndexStrategyFactory(
           Provider<IdConverterCatalog> idConverterCatalog,
           Provider<IndexSchemaFillActionsCatalog> indexSchemaFillerActionsCatalog) {
     this.idConverterCatalog = idConverterCatalog;

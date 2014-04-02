@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Georgi Georgiev (GeorgievJon@gmail.com)
  */
-public class IndexStrategyFactoryImplTest {
+public class AnnotatedIndexStrategyFactoryTest {
 
   @Rule
   public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -50,7 +50,7 @@ public class IndexStrategyFactoryImplTest {
       }
     };
 
-    factory = new IndexStrategyFactoryImpl(Providers.of(idConverterCatalog), Providers.of(indexSchemaFillActionsCatalog));
+    factory = new AnnotatedIndexStrategyFactory(Providers.of(idConverterCatalog), Providers.of(indexSchemaFillActionsCatalog));
   }
 
   @Test
