@@ -11,7 +11,9 @@ import com.google.appengine.api.search.IndexSpec;
 import com.google.appengine.api.search.SearchServiceFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -64,8 +66,17 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
       }
 
       if (indexingSchema.getFullText().contains(field.getName())) {
+        Set<String> fieldValues = new HashSet<String>();
+        IndexWriter indexWriter = new IndexWriter();
 
-        Set<String> fieldValues = new IndexWriter().createIndex(String.valueOf(fieldValue));
+        if(fieldValue != null && fieldValue instanceof Collection) {
+          Collection collection = (Collection) fieldValue;
+          for (Object object : collection) {
+            fieldValues.addAll(indexWriter.createIndex(String.valueOf(object)));
+          }
+        } else {
+          fieldValues.addAll(indexWriter.createIndex(String.valueOf(fieldValue)));
+        }
 
         for (String value : fieldValues) {
           documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(value));

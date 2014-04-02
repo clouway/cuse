@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -478,6 +479,20 @@ public abstract class SearchEngineContractTest {
     List<User> result = searchEngine.search(User.class).where("description", SearchFilters.is("sepa")).returnAll().now();
 
     assertThat(result.size(), is(0));
+  }
+
+  @Test
+  public void fullTextSearchForPropertyFromCollectionType() throws Exception {
+    List<String> tags = new ArrayList<String>(){{
+      add("example for");
+      add("test");
+    }};
+
+    store(new User(1l, tags));
+
+    List<User> result = searchEngine.search(User.class).where("tags", SearchFilters.is("ample")).returnAll().now();
+
+    assertThat(result.size(), is(1));
   }
 
   @Test
