@@ -11,8 +11,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
@@ -33,24 +31,7 @@ public class AnnotatedIndexStrategyFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    IndexSchemaFillActionsCatalog indexSchemaFillActionsCatalog = new IndexSchemaFillActionsCatalog() {
-      @Override
-      public IndexSchemaFillAction getFillAction(Annotation[] annotations) {
-        for (Annotation annotation : annotations) {
-          if (FullTextSearch.class.getSimpleName().equals(annotation.annotationType().getSimpleName())) {
-            return new IndexSchemaFillAction() {
-              @Override
-              public void fill(IndexingSchema.IndexingSchemaBuilder indexingSchemaBuilder, String propertyName) {
-                indexingSchemaBuilder.fullTextFields(propertyName);
-              }
-            };
-          }
-        }
-        return null;
-      }
-    };
-
-    factory = new AnnotatedIndexStrategyFactory(Providers.of(idConverterCatalog), Providers.of(indexSchemaFillActionsCatalog));
+    factory = new AnnotatedIndexStrategyFactory(Providers.of(idConverterCatalog));
   }
 
   @Test
@@ -93,16 +74,6 @@ public class AnnotatedIndexStrategyFactoryTest {
     indexingStrategy.getId(new TestIdEntity(20l));
   }
 
-  @Test
-  public void addAnnotatedPropertyToIndexSchema() throws Exception {
-    IndexingStrategy indexingStrategy = factory.create(TestEntity.class);
-
-    List<String> defaultSearchProperties = indexingStrategy.getIndexingSchema().getFields();
-    List<String> searchProperties = indexingStrategy.getIndexingSchema().getFullText();
-
-    assertThat("incorrect default schema properties", defaultSearchProperties, is(Arrays.asList("entityId", "defaultProperty")));
-    assertThat("incorrect index schema properties", searchProperties, is(Arrays.asList("searchProperty")));
-  }
   @SearchIndex(name = "IndexName")
   static class TestEntity {
 
