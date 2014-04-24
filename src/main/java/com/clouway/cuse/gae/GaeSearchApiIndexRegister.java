@@ -11,6 +11,7 @@ import com.google.appengine.api.search.IndexSpec;
 import com.google.appengine.api.search.SearchServiceFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -31,7 +32,7 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
     addDocumentInIndex(strategy.getIndexName(), document);
   }
 
-  public void delete(String indexName, List<Long> objectIds){
+  public void delete(String indexName, List<Long> objectIds) {
     List<String> stringObjectIds = new ArrayList<String>();
     for (Long id : objectIds) {
       stringObjectIds.add(String.valueOf(id));
@@ -54,46 +55,104 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
 
     for (java.lang.reflect.Field field : instance.getClass().getDeclaredFields()) {
 
-      Object fieldValue = getFieldValue(instance, field);
+      Object instanceValue = getFieldValue(instance, field);
 
-      if (indexingSchema.getFields().contains(field.getName())) {
+      if (containsField(indexingSchema.getFields(), field.getName())) {
 
-        if (field.getType().equals(Date.class)) {
-          buildDateField(documentBuilder, field, (Date) fieldValue);
-        } else {
-          buildTextField(documentBuilder, field, fieldValue);
-        }
-      }
+        List<DocumentProperty> documentProperties = getDocumentProperty(indexingSchema.getFields(), field, instanceValue);
 
-      if (indexingSchema.getFullText().contains(field.getName())) {
-        Set<String> fieldValues = new HashSet<String>();
-        IndexWriter indexWriter = new IndexWriter();
-
-        if(fieldValue != null && fieldValue instanceof Collection) {
-          Collection collection = (Collection) fieldValue;
-          for (Object object : collection) {
-            fieldValues.addAll(indexWriter.createIndex(String.valueOf(object)));
+        for (DocumentProperty property : documentProperties) {
+          if (field.getType().equals(Date.class)) {
+            buildDateField(documentBuilder, field, (Date) instanceValue);
+          } else {
+            buildTextField(documentBuilder, property.getName(), property.getValue());
           }
-        } else {
-          fieldValues.addAll(indexWriter.createIndex(String.valueOf(fieldValue)));
-        }
-
-        for (String value : fieldValues) {
-          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(value));
         }
       }
 
-      if (indexingSchema.getWordFields().contains(field.getName()) && fieldValue != null && fieldValue instanceof String) {
-        String stringValue = (String) fieldValue;
-        String[] splitValues = stringValue.split(" ");
+      if (containsField(indexingSchema.getFullText(), field.getName())) {
 
-        for (String value : splitValues) {
-          documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(value));
+        List<DocumentProperty> documentProperties = getDocumentProperty(indexingSchema.getFullText(), field, instanceValue);
+
+        for (DocumentProperty property : documentProperties) {
+          Set<String> fieldValues = new HashSet<String>();
+          IndexWriter indexWriter = new IndexWriter();
+
+          Object propertyValue = property.getValue();
+
+          if (propertyValue != null && propertyValue instanceof Collection) {
+            Collection collection = (Collection) propertyValue;
+            for (Object object : collection) {
+              fieldValues.addAll(indexWriter.createIndex(String.valueOf(object)));
+            }
+          } else {
+            fieldValues.addAll(indexWriter.createIndex(String.valueOf(propertyValue)));
+          }
+
+          applyTextValues(documentBuilder, property.name, fieldValues);
+        }
+      }
+
+      if (containsField(indexingSchema.getWordFields(), field.getName()) && instanceValue != null && instanceValue instanceof String) {
+
+        List<DocumentProperty> fieldValues = getDocumentProperty(indexingSchema.getWordFields(), field, instanceValue);
+
+        for (DocumentProperty fieldValue : fieldValues) {
+          String stringValue = (String) fieldValue.getValue();
+          String[] splitValues = stringValue.split(" ");
+
+          applyTextValues(documentBuilder, fieldValue.name, Arrays.asList(splitValues));
         }
       }
     }
 
     return documentBuilder.build();
+  }
+
+  private void applyTextValues(Document.Builder documentBuilder, String fieldName, Iterable<String> values) {
+    for (String value : values) {
+      documentBuilder.addField(Field.newBuilder().setName(fieldName).setText(value));
+    }
+  }
+
+  private boolean containsField(List<String> fields, String fieldName) {
+    for (String rawFieldName : fields) {
+      List<String> splitFieldName = Arrays.asList(rawFieldName.split("_"));
+      if(splitFieldName.contains(fieldName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  //todo: use recursion for optimization
+  private List<DocumentProperty> getDocumentProperty(List<String> fields, java.lang.reflect.Field field, Object instance) {
+
+    List<DocumentProperty> documentProperties = new ArrayList<DocumentProperty>();
+
+    for (String rawFieldName : fields) {
+      String[] splitFieldName = rawFieldName.split("_");
+
+      if (splitFieldName.length == 1) {
+        if (splitFieldName[0].equals(field.getName())) {
+          documentProperties.add(new DocumentProperty(rawFieldName, instance));
+        }
+      } else if (splitFieldName.length == 2) {
+        if (splitFieldName[0].equals(field.getName()) && instance != null) {
+          try {
+            java.lang.reflect.Field childField = instance.getClass().getDeclaredField(splitFieldName[1]);
+            Object childValue = getFieldValue(instance, childField);
+            documentProperties.add(new DocumentProperty(rawFieldName, childValue));
+          } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+          }
+        } else if (splitFieldName[0].equals(field.getName()) && instance == null) {
+          documentProperties.add(new DocumentProperty(rawFieldName, null));
+        }
+      }
+    }
+
+    return documentProperties;
   }
 
   private Object getFieldValue(Object instance, java.lang.reflect.Field field) {
@@ -122,7 +181,26 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
     }
   }
 
-  private void buildTextField(Document.Builder documentBuilder, java.lang.reflect.Field field, Object fieldValue) {
-    documentBuilder.addField(Field.newBuilder().setName(field.getName()).setText(String.valueOf(fieldValue)));
+  private void buildTextField(Document.Builder documentBuilder, String filedName, Object fieldValue) {
+    documentBuilder.addField(Field.newBuilder().setName(filedName).setText(String.valueOf(fieldValue)));
+  }
+
+  private class DocumentProperty {
+
+    private String name;
+    private Object value;
+
+    DocumentProperty(String field, Object value) {
+      this.name = field;
+      this.value = value;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public Object getValue() {
+      return value;
+    }
   }
 }

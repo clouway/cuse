@@ -29,7 +29,7 @@ class AnnotatedIndexStrategyFactory implements IndexStrategyFactory {
   public IndexingStrategy create(final Class<?> indexClazz) {
     SearchIndex searchIndex = indexClazz.getAnnotation(SearchIndex.class);
 
-    if(searchIndex != null) {
+    if (searchIndex != null) {
       final String indexName = searchIndex.name();
 
       return new IndexingStrategy() {
@@ -58,12 +58,12 @@ class AnnotatedIndexStrategyFactory implements IndexStrategyFactory {
     Field[] fields = instance.getClass().getDeclaredFields();
     for (Field field : fields) {
       SearchId idAnnotation = field.getAnnotation(SearchId.class);
-      if(idAnnotation != null) {
+      if (idAnnotation != null) {
         try {
           field.setAccessible(true);
           Object id = field.get(instance);
           IdConverter converter = idConverterCatalog.get().getConverter(field.getType());
-          if(converter == null) {
+          if (converter == null) {
             throw new NotConfiguredIdConvertorException();
           }
           return converter.convertFrom(id);
@@ -79,17 +79,38 @@ class AnnotatedIndexStrategyFactory implements IndexStrategyFactory {
   private IndexingSchema getIndexSchema(Class<?> indexClazz) {
     IndexingSchema.IndexingSchemaBuilder indexingSchemaBuilder = aNewIndexingSchema();
 
+    getIndexSchema(indexClazz, "", indexingSchemaBuilder);
+
+    return indexingSchemaBuilder.build();
+  }
+
+  private IndexingSchema getIndexSchema(Class<?> indexClazz, String parent, IndexingSchema.IndexingSchemaBuilder indexingSchemaBuilder) {
+
     Field[] fields = indexClazz.getDeclaredFields();
     for (Field field : fields) {
 
+      String name = field.getName();
+
+      if (!"".equals(parent)) {
+        name = parent.concat("_").concat(field.getName());
+      }
+
       IndexSchemaFillAction action = indexSchemaFillerActionsCatalog.get().getFillAction(field.getAnnotations());
-      if(action != null) {
-        action.fill(indexingSchemaBuilder, field.getName());
+
+      if (action != null) {
+        action.fill(indexingSchemaBuilder, name);
+      } else if (isIndex(field)) {
+        getIndexSchema(field.getType(), field.getName(), indexingSchemaBuilder);
       } else {
-        indexingSchemaBuilder.fields(field.getName());
+        indexingSchemaBuilder.fields(name);
       }
     }
 
     return indexingSchemaBuilder.build();
+  }
+
+  private boolean isIndex(Field field) {
+    SearchIndex annotation = field.getType().getAnnotation(SearchIndex.class);
+    return annotation != null;
   }
 }

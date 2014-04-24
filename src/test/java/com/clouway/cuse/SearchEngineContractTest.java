@@ -811,6 +811,34 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(0));
   }
 
+  @Test
+  public void searchByEmbeddedIndex() throws Exception {
+
+    AddressIndex addressIndex = new AddressIndex(100l, "CityName", "5000");
+    CustomerIndex customerIndex = new CustomerIndex(200l, addressIndex);
+
+    repository.store(customerIndex.getEntityId(), customerIndex);
+    searchEngine.register(customerIndex);
+
+    List<CustomerIndex> result = searchEngine.search(CustomerIndex.class).where("address_postCode", SearchFilters.is("5000")).returnAll().now();
+
+    assertThat(result.size(), is(1));
+  }
+
+  @Test
+  public void fullTextSearchByEmbeddedIndex() throws Exception {
+
+    AddressIndex addressIndex = new AddressIndex(100l, "CityName", "5000");
+    CustomerIndex customerIndex = new CustomerIndex(200l, addressIndex);
+
+    repository.store(customerIndex.getEntityId(), customerIndex);
+    searchEngine.register(customerIndex);
+
+    List<CustomerIndex> result = searchEngine.search(CustomerIndex.class).where("address_city", SearchFilters.is("cit")).returnAll().now();
+
+    assertThat(result.size(), is(1));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {

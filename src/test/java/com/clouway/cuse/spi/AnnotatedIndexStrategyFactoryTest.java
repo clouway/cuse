@@ -103,6 +103,17 @@ public class AnnotatedIndexStrategyFactoryTest {
     assertThat("incorrect default schema properties", defaultSearchProperties, is(Arrays.asList("entityId", "defaultProperty")));
     assertThat("incorrect index schema properties", searchProperties, is(Arrays.asList("searchProperty")));
   }
+
+  @Test
+  public void createEmbeddedIndex() throws Exception {
+
+    IndexingStrategy indexingStrategy = factory.create(CustomerIndex.class);
+
+    List<String> defaultSearchProperties = indexingStrategy.getIndexingSchema().getFields();
+    assertThat("incorrect default schema properties", defaultSearchProperties, is(Arrays.asList("entityId", "customerName", "address_entityId", "address_postCode")));
+
+  }
+
   @SearchIndex(name = "IndexName")
   static class TestEntity {
 
