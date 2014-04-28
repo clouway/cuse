@@ -8,6 +8,4 @@ public interface IndexingStrategy<T> {
   String getIndexName();
 
   String getId(T t);
-
-  IndexingSchema getIndexingSchema();
 }
