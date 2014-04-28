@@ -820,7 +820,7 @@ public abstract class SearchEngineContractTest {
     repository.store(customerIndex.getEntityId(), customerIndex);
     searchEngine.register(customerIndex);
 
-    List<CustomerIndex> result = searchEngine.search(CustomerIndex.class).where("address_postCode", SearchFilters.is("5000")).returnAll().now();
+    List<CustomerIndex> result = searchEngine.search(CustomerIndex.class).where("address", SearchFilters.is("5000")).returnAll().now();
 
     assertThat(result.size(), is(1));
   }
@@ -834,8 +834,39 @@ public abstract class SearchEngineContractTest {
     repository.store(customerIndex.getEntityId(), customerIndex);
     searchEngine.register(customerIndex);
 
-    List<CustomerIndex> result = searchEngine.search(CustomerIndex.class).where("address_city", SearchFilters.is("cit")).returnAll().now();
+    List<CustomerIndex> result = searchEngine.search(CustomerIndex.class).where("address", SearchFilters.is("cit")).returnAll().now();
 
+    assertThat(result.size(), is(1));
+  }
+
+  @Test
+  public void searchInEmbeddedIndexFromSameType() throws Exception {
+
+    AddressIndex oldAddressIndex = new AddressIndex(100l, "Some City", "5000");
+    AddressIndex newAddressIndex = new AddressIndex(200l, "Another City", "2000");
+    EmployeeIndex employeeIndex = new EmployeeIndex(300l, "employee name", oldAddressIndex, newAddressIndex);
+
+    repository.store(300l, employeeIndex);
+    searchEngine.register(employeeIndex);
+
+    List<EmployeeIndex> oldAddressSearchResult = searchEngine.search(EmployeeIndex.class).where("oldAddress", SearchFilters.is("Some")).returnAll().now();
+    assertThat(oldAddressSearchResult.size(), is(1));
+
+    List<EmployeeIndex> newAddressSearchResult = searchEngine.search(EmployeeIndex.class).where("newAddress", SearchFilters.is("Another")).returnAll().now();
+    assertThat(newAddressSearchResult.size(), is(1));
+  }
+
+  @Test
+  public void searchInComplexEmbeddedIndex() throws Exception {
+
+    AddressIndex addressIndex = new AddressIndex(100l, "CityName", "5000");
+    CustomerIndex customerIndex = new CustomerIndex(200l, addressIndex);
+    CompanyIndex companyIndex = new CompanyIndex(300l, "company", customerIndex);
+
+    repository.store(300l, companyIndex);
+    searchEngine.register(companyIndex);
+
+    List<CompanyIndex> result = searchEngine.search(CompanyIndex.class).where("customer", SearchFilters.is("city")).returnAll().now();
     assertThat(result.size(), is(1));
   }
 

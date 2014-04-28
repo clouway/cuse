@@ -18,7 +18,7 @@ import static com.google.appengine.api.search.Field.newBuilder;
 public class FullWordSearchFieldIndexer implements FieldIndexer {
 
   @Override
-  public List<Field> execute(String fieldName, java.lang.reflect.Field field, Object fieldInstanceValue) {
+  public List<Field> index(String fieldName, java.lang.reflect.Field field, Object fieldInstanceValue) {
 
     ArrayList<Field> fields = new ArrayList<Field>();
     Set<String> fieldValues = new HashSet<String>();

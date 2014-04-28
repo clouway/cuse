@@ -10,6 +10,8 @@ import com.clouway.cuse.gae.filedindexing.fulltextindex.FullTextSearchFieldCrite
 import com.clouway.cuse.gae.filedindexing.fulltextindex.FullTextSearchFieldIndexer;
 import com.clouway.cuse.gae.filedindexing.fullwordindex.FullWordSearchFieldCriteria;
 import com.clouway.cuse.gae.filedindexing.fullwordindex.FullWordSearchFieldIndexer;
+import com.clouway.cuse.gae.filedindexing.idindexer.IdFieldCriteria;
+import com.clouway.cuse.gae.filedindexing.idindexer.IdFieldIndexer;
 import com.clouway.cuse.gae.filedindexing.searchindex.SimpleSearchFieldCriteria;
 import com.clouway.cuse.gae.filedindexing.searchindex.SimpleSearchFieldIndexer;
 import com.google.inject.util.Providers;
@@ -50,6 +52,7 @@ public class SearchEngineFactory {
       put(new FullTextSearchFieldCriteria(), new FullTextSearchFieldIndexer());
       put(new DateFieldCriteria(), new DateFieldIndexer());
       put(new FullWordSearchFieldCriteria(), new FullWordSearchFieldIndexer());
+      put(new IdFieldCriteria(), new IdFieldIndexer());
     }};
 
 

@@ -10,6 +10,6 @@ import java.util.List;
  */
 public interface FieldIndexer {
 
-  List<Field> execute(String fieldName, java.lang.reflect.Field field, Object fieldInstanceValue);
+  List<Field> index(String fieldName, java.lang.reflect.Field field, Object fieldInstanceValue);
 
 }

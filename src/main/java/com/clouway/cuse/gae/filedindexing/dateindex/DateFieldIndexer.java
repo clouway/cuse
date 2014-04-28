@@ -15,7 +15,7 @@ import static com.google.appengine.api.search.Field.newBuilder;
 public class DateFieldIndexer implements FieldIndexer {
 
   @Override
-  public List<Field> execute(String fieldName, java.lang.reflect.Field field, Object fieldInstanceValue) {
+  public List<Field> index(String fieldName, java.lang.reflect.Field field, Object fieldInstanceValue) {
 
     List<Field> fields = new ArrayList<Field>();
     Field documentField;

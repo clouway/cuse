@@ -1,4 +1,4 @@
-package com.clouway.cuse.gae.filedindexing.searchindex;
+package com.clouway.cuse.gae.filedindexing.idindexer;
 
 import com.clouway.cuse.gae.filedindexing.FieldIndexer;
 import com.google.appengine.api.search.Field;
@@ -11,7 +11,7 @@ import static com.google.appengine.api.search.Field.newBuilder;
 /**
  * @author Georgi Georgiev (GeorgievJon@gmail.com)
  */
-public class SimpleSearchFieldIndexer implements FieldIndexer {
+public class IdFieldIndexer implements FieldIndexer {
 
   @Override
   public List<Field> index(String fieldName, java.lang.reflect.Field field, Object fieldInstanceValue) {
