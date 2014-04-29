@@ -19,11 +19,13 @@ public class FullTextSearchFieldIndexer implements FieldIndexer {
   @Override
   public List<Field> index(String fieldName, java.lang.reflect.Field field, Object fieldInstanceValue) {
 
-    ArrayList<Field> fields = new ArrayList<Field>();
+    List<Field> fields = new ArrayList<Field>();
     Set<String> fieldValues = new HashSet<String>();
     IndexWriter indexWriter = new IndexWriter();
 
-    if (fieldInstanceValue != null && fieldInstanceValue instanceof Collection) {
+    if (fieldInstanceValue == null) {
+      fieldValues.add("");
+    } else if (fieldInstanceValue instanceof Collection) {
       Collection collection = (Collection) fieldInstanceValue;
       for (Object object : collection) {
         fieldValues.addAll(indexWriter.createIndex(String.valueOf(object)));

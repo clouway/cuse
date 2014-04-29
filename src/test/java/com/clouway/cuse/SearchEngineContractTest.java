@@ -870,6 +870,19 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(1));
   }
 
+  @Test
+  public void skipMissingEmbeddedIndex() throws Exception {
+
+    CustomerIndex customerIndex = new CustomerIndex(200l, "customer name");
+    CompanyIndex companyIndex = new CompanyIndex(300l, "company", customerIndex);
+
+    repository.store(300l, companyIndex);
+    searchEngine.register(companyIndex);
+
+    List<CompanyIndex> result = searchEngine.search(CompanyIndex.class).where("customer", SearchFilters.is("customer name")).returnAll().now();
+    assertThat(result.size(), is(1));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {

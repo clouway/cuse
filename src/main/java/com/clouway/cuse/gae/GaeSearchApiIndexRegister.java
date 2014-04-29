@@ -62,19 +62,19 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
     return documentBuilder.build();
   }
 
-  private Document.Builder buildDocument(String defualtName, Object instance, Document.Builder documentBuilder) {
+  private Document.Builder buildDocument(String defaultName, Object instance, Document.Builder documentBuilder) {
     for (java.lang.reflect.Field field : instance.getClass().getDeclaredFields()) {
 
       Object fieldInstanceValue = getFieldValue(instance, field);
 
       String fieldName = field.getName();
 
-      if (!"".equals(defualtName)) {
-        fieldName = defualtName;
+      if (!"".equals(defaultName)) {
+        fieldName = defaultName;
       }
 
 //      if (!"".equals(parent)) {
-////        fieldName = parent.concat("_").concat(field.getName());
+//        fieldName = parent.concat("_").concat(field.getName());
 //      }
 
       SearchIndex annotation = field.getType().getAnnotation(SearchIndex.class);
@@ -94,7 +94,9 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
       } else {
         //sub index found
         Object childInstance = getFieldValue(instance, field);
-        buildDocument(fieldName, childInstance, documentBuilder);
+        if(childInstance != null) {
+          buildDocument(fieldName, childInstance, documentBuilder);
+        }
       }
     }
 

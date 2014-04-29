@@ -21,6 +21,11 @@ public class CustomerIndex {
     this.address = address;
   }
 
+  public CustomerIndex(Long entityId, String customerName) {
+    this.entityId = entityId;
+    this.customerName = customerName;
+  }
+
   public Long getEntityId() {
     return entityId;
   }

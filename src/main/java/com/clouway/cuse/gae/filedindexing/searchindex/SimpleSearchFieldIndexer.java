@@ -18,7 +18,12 @@ public class SimpleSearchFieldIndexer implements FieldIndexer {
 
     List<Field> fields = new ArrayList<Field>();
 
-    Field documentField = newBuilder().setName(fieldName).setText(String.valueOf(fieldInstanceValue)).build();
+    Field documentField;
+    if (fieldInstanceValue == null) {
+      documentField = newBuilder().setName(fieldName).setText("").build();
+    } else {
+      documentField = newBuilder().setName(fieldName).setText(String.valueOf(fieldInstanceValue)).build();
+    }
 
     fields.add(documentField);
 
