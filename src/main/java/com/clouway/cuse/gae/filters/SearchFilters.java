@@ -85,13 +85,13 @@ public class SearchFilters {
   }
 
   private static List<String> escapeSymbolsList(List<String> values) {
-    List<String> symbolsList = new ArrayList<String>();
+    List<String> valuesList = new ArrayList<String>();
     if(values != null) {
       for (String value : values) {
-        symbolsList.add(escapeSymbols(value));
+        valuesList.add(escapeSymbols(value));
       }
     }
-    return symbolsList;
+    return valuesList;
   }
 
   private static String escapeSymbols(String value) {
