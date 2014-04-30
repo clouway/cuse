@@ -883,6 +883,15 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(1));
   }
 
+  @Test
+  public void escapeSpecialSymbols() throws Exception {
+    store(new User(1l, ": , + - = < > "));
+
+    List<User> result = searchEngine.search(User.class).where(": , + - = < >").returnAll().now();
+
+    assertThat(result.size(), is(1));
+  }
+
   private void store(User... users) {
 
     for (User user : users) {

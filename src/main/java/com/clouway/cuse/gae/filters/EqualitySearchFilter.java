@@ -28,13 +28,19 @@ public class EqualitySearchFilter implements SearchFilter {
 
     String filter = "";
 
+    String field = fields.get(0);
+
+    if(field == null || "".equals(field)) {
+      return value;
+    }
+
     if (value != null && !"".equals(value)) {
-      filter = fields.get(0) + ":" + value + " ";
+      filter = field + ":" + value + " ";
     }
 
     if (values != null && !values.isEmpty()) {
       for (String value : values) {
-        filter = filter.concat(fields.get(0) + ":" + value + " ");
+        filter = filter.concat(field + ":" + value + " ");
       }
     }
 

@@ -3,16 +3,31 @@ package com.clouway.cuse.gae.filters;
 import com.clouway.cuse.spi.EmptySearchFilterException;
 import com.clouway.cuse.spi.filters.SearchFilter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
 public class SearchFilters {
 
+  private static Map<String, String> escapeSymbolsMap = new HashMap<String, String>(){{
+    put(":","\\:");
+    put(",","\\,");
+    put("+","\\+");
+    put("-","\\\\-");
+    put("=","\\=");
+    put("<","\\<");
+    put(">","\\>");
+  }};
+
   public static SearchFilter is(String value) {
-    if (value == null || "".equals(value.trim())) {
+    value = escapeSymbols(value);
+    if (value == null || "".equals(value)) {
       throw new EmptySearchFilterException();
     }
     return new EqualitySearchFilter(value);
@@ -31,7 +46,7 @@ public class SearchFilters {
   }
 
   public static SearchFilter isAnyOf(String... values) {
-    return new OrSearchFilter(values);
+    return new OrSearchFilter(escapeSymbolsList(Arrays.asList(values)));
   }
 
   public static <T> SearchFilter isAnyOf(List<T> values) {
@@ -42,7 +57,7 @@ public class SearchFilters {
   }
 
   public static SearchFilter anyIs(String value) {
-    return new MultiFieldValueFilter(value);
+    return new MultiFieldValueFilter(escapeSymbols(value));
   }
 
   public static SearchFilter lessThan(Date value) {
@@ -66,6 +81,29 @@ public class SearchFilters {
   }
 
   public static SearchFilter is(List<String> values) {
-    return new EqualitySearchFilter(values);
+    return new EqualitySearchFilter(escapeSymbolsList(values));
+  }
+
+  private static List<String> escapeSymbolsList(List<String> values) {
+    List<String> symbolsList = new ArrayList<String>();
+    if(values != null) {
+      for (String value : values) {
+        symbolsList.add(escapeSymbols(value));
+      }
+    }
+    return symbolsList;
+  }
+
+  private static String escapeSymbols(String value) {
+    if (value == null || "".equals(value.trim())) {
+      return "";
+    }
+
+    value = value.trim();
+    for (String symbol : escapeSymbolsMap.keySet()) {
+      value = value.replace(symbol, escapeSymbolsMap.get(symbol));
+    }
+
+    return value;
   }
 }
