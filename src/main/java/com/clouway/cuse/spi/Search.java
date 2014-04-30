@@ -1,5 +1,6 @@
 package com.clouway.cuse.spi;
 
+import com.clouway.cuse.gae.filters.SearchFilters;
 import com.clouway.cuse.spi.annotations.SearchIndex;
 import com.clouway.cuse.spi.filters.SearchFilter;
 
@@ -56,14 +57,15 @@ public class Search<T> {
       return this;
     }
 
-    public SearchBuilder<T> where(final String query) {
+    public SearchBuilder<T> where(String query) {
 
-      if (query != null ) {
-        if (!"".equals(query.trim())) {
-          filters.add(query);
+      if (query != null && !"".equals(query.trim())) {
+        SearchFilter filter = SearchFilters.is(query);
+        String value = filter.getValue(Arrays.asList(""));
+        if (value != null && !"".equals(value)) {
+          filters.add(value);
         }
       }
-
 
       return this;
     }
