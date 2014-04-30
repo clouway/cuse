@@ -59,13 +59,11 @@ public class Search<T> {
 
     public SearchBuilder<T> where(String query) {
 
-      if (query != null) {
-        if (!"".equals(query.trim())) {
-          SearchFilter filter = SearchFilters.is(query);
-          String value = filter.getValue(Arrays.asList(""));
-          if (value != null && !"".equals(value)) {
-            filters.add(value);
-          }
+      if (query != null && !"".equals(query.trim())) {
+        SearchFilter filter = SearchFilters.is(query);
+        String value = filter.getValue(Arrays.asList(""));
+        if (value != null && !"".equals(value)) {
+          filters.add(value);
         }
       }
 
