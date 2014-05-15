@@ -6,7 +6,6 @@ import com.clouway.cuse.spi.SearchLimitExceededException;
 import com.clouway.cuse.spi.SortOrder;
 import com.clouway.cuse.spi.SortType;
 import com.google.appengine.api.search.*;
-import com.google.appengine.repackaged.com.google.common.base.Strings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,7 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
 
     QueryOptions.Builder queryOptionsBuilder = queryOptionsBuilder(limit, offset);
 
-    if (!Strings.isNullOrEmpty(sortingField)) {
+    if (sortingField != null && !"".equals(sortingField)) {
       SortOptions sortOptions = buildSortOptions(sortingField, sortOrder, sortType);
       queryOptionsBuilder.setSortOptions(sortOptions);
     }
