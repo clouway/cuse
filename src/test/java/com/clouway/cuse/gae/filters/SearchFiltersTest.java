@@ -16,25 +16,31 @@ public class SearchFiltersTest{
   @Test
   public void escapeSymbolsForString() throws Exception {
     SearchFilter filter = SearchFilters.is(":");
-    assertEscapedValue(filter, "field:\\: ", "field");
+    assertEscapedValue(filter, "field:\"\\:\" ", "field");
   }
 
   @Test
   public void escapeSymbolsForAnyString() throws Exception {
     SearchFilter filter = SearchFilters.anyIs(":");
-    assertEscapedValue(filter, "fieldA:\\: OR fieldB:\\:", "fieldA", "fieldB");
+    assertEscapedValue(filter, "fieldA:\"\\:\" OR fieldB:\"\\:\"", "fieldA", "fieldB");
   }
 
   @Test
   public void escapeSymbolsForAnyStringFromList() throws Exception {
     SearchFilter filter = SearchFilters.is(Arrays.asList(":"));
-    assertEscapedValue(filter, "field:\\: ", "field");
+    assertEscapedValue(filter, "field:\"\\:\" ", "field");
   }
 
   @Test
   public void escapeSymbolsForAnyElementFromArray() throws Exception {
     SearchFilter filter = SearchFilters.isAnyOf(": =");
-    assertEscapedValue(filter, "field:(\\: \\=)", "field");
+    assertEscapedValue(filter, "field:(\"\\:\" \"\\=\")", "field");
+  }
+
+  @Test
+  public void wrapWordsWithSpecialSymbols() throws Exception {
+    SearchFilter filter = SearchFilters.isAnyOf("city 12:23:cd");
+    assertEscapedValue(filter, "field:(city \"12\\:23\\:cd\")", "field");
   }
 
   private void assertEscapedValue(SearchFilter filter, String expectedValue, String... fields) {
