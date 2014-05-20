@@ -885,9 +885,20 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void escapeSpecialSymbols() throws Exception {
-    store(new User(1l, ": , + - = < > "));
+    store(new User(1l, ":,+-=<>"));
 
-    List<User> result = searchEngine.search(User.class).where(": , + - = < >").returnAll().now();
+    List<User> result = searchEngine.search(User.class).where(":,+-=<>").returnAll().now();
+
+    assertThat(result.size(), is(1));
+  }
+
+  @Test
+  public void wrapWordsWithSpecialSymbols() throws Exception {
+    store(new User(10l, "user d8:66:66"));
+    store(new User(20l, "user d8:66:b6"));
+    store(new User(30l, "user d8:66:b7"));
+
+    List<User> result = searchEngine.search(User.class).where("d8:66:66").returnAll().now();
 
     assertThat(result.size(), is(1));
   }

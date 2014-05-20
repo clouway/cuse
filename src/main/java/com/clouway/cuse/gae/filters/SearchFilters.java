@@ -15,14 +15,14 @@ import java.util.Map;
  */
 public class SearchFilters {
 
-  private static Map<String, String> escapeSymbolsMap = new HashMap<String, String>(){{
-    put(":","\\:");
-    put(",","\\,");
-    put("+","\\+");
-    put("-","\\\\-");
-    put("=","\\=");
-    put("<","\\<");
-    put(">","\\>");
+  private static Map<String, String> escapeSymbolsMap = new HashMap<String, String>() {{
+    put(":", "\\:");
+    put(",", "\\,");
+    put("+", "\\+");
+    put("-", "\\\\-");
+    put("=", "\\=");
+    put("<", "\\<");
+    put(">", "\\>");
   }};
 
   public static SearchFilter is(String value) {
@@ -86,7 +86,7 @@ public class SearchFilters {
 
   private static List<String> escapeSymbolsList(List<String> values) {
     List<String> valuesList = new ArrayList<String>();
-    if(values != null) {
+    if (values != null) {
       for (String value : values) {
         valuesList.add(escapeSymbols(value));
       }
@@ -104,6 +104,23 @@ public class SearchFilters {
       value = value.replace(symbol, escapeSymbolsMap.get(symbol));
     }
 
+    String[] splitValues = value.split(" "); //split of words
+    for (String splitValue : splitValues) {
+      if (!"".equals(splitValue) && containsSpacialSymbol(splitValue)) {
+        value = value.replace(splitValue, "\"" + splitValue + "\"");
+      }
+    }
+
     return value;
+  }
+
+  private static boolean containsSpacialSymbol(String splitValue) {
+    for (String symbol : escapeSymbolsMap.keySet()) {
+      if (splitValue.contains(symbol)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
