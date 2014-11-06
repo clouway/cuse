@@ -100,27 +100,11 @@ public class SearchFilters {
     }
 
     value = value.trim();
+
     for (String symbol : escapeSymbolsMap.keySet()) {
       value = value.replace(symbol, escapeSymbolsMap.get(symbol));
     }
 
-    String[] splitValues = value.split(" "); //split of words
-    for (String splitValue : splitValues) {
-      if (!"".equals(splitValue) && containsSpacialSymbol(splitValue)) {
-        value = value.replace(splitValue, "\"" + splitValue + "\"");
-      }
-    }
-
     return value;
-  }
-
-  private static boolean containsSpacialSymbol(String splitValue) {
-    for (String symbol : escapeSymbolsMap.keySet()) {
-      if (splitValue.contains(symbol)) {
-        return true;
-      }
-    }
-
-    return false;
   }
 }
