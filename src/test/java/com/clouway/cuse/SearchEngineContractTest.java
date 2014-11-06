@@ -235,6 +235,13 @@ public abstract class SearchEngineContractTest {
     List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("Jack")).fetchMaximum(0).now();
 
     assertThat(result.size(), is(2));
+    //sort result for correct assert
+    Collections.sort(result, new Comparator<User>() {
+      @Override
+      public int compare(User user1, User user2) {
+        return user1.id.compareTo(user2.id);
+      }
+    });
     assertThat(result.get(0).id, is(1l));
     assertThat(result.get(1).id, is(2l));
   }
@@ -925,6 +932,16 @@ public abstract class SearchEngineContractTest {
     store(new User(1l, "Ltd. \"John - Adams\""), new User(2l, "Tom"));
 
     List<User> result = searchEngine.search(User.class).where("\"Ltd. John - Adams\"").returnAll().now();
+
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).name, is("Ltd. \"John - Adams\""));
+  }
+
+  @Test
+  public void escapeQuotesWhenTheyAreOddCount() throws Exception {
+    store(new User(1l, "Ltd. \"John - Adams\""), new User(2l, "Tom"));
+
+    List<User> result = searchEngine.search(User.class).where("Ltd. \" John - Adams").returnAll().now();
 
     assertThat(result.size(), is(1));
     assertThat(result.get(0).name, is("Ltd. \"John - Adams\""));

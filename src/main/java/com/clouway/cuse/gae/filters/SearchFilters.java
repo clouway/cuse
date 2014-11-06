@@ -105,6 +105,13 @@ public class SearchFilters {
       value = value.replace(symbol, escapeSymbolsMap.get(symbol));
     }
 
+    int countOfQuotes = value.length() - value.replaceAll("\"", "").length();
+
+    //when quotes are odd count they should be ignored
+    if (countOfQuotes % 2 != 0) {
+      value = value.replace("\"", "");
+    }
+
     return value;
   }
 }

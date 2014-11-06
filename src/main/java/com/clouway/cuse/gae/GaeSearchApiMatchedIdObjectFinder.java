@@ -19,7 +19,6 @@ public class GaeSearchApiMatchedIdObjectFinder implements MatchedIdObjectFinder 
   public List<String> find(String indexName, List<String> filters, int limit, int offset, String sortingField, SortOrder sortOrder, SortType sortType) {
 
     String stringQuery = buildStringQuery(filters);
-    System.out.println(stringQuery);
 
     Query query = buildQuery(stringQuery, limit, offset, sortingField, sortOrder, sortType);
     IndexSpec indexSpec = IndexSpec.newBuilder().setName(indexName).build();
