@@ -53,4 +53,30 @@ public class User {
     this.id = id;
     this.tags = tags;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    User user = (User) o;
+
+    if (description != null ? !description.equals(user.description) : user.description != null) return false;
+    if (family != null ? !family.equals(user.family) : user.family != null) return false;
+    if (id != null ? !id.equals(user.id) : user.id != null) return false;
+    if (name != null ? !name.equals(user.name) : user.name != null) return false;
+    if (tags != null ? !tags.equals(user.tags) : user.tags != null) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = id != null ? id.hashCode() : 0;
+    result = 31 * result + (name != null ? name.hashCode() : 0);
+    result = 31 * result + (family != null ? family.hashCode() : 0);
+    result = 31 * result + (description != null ? description.hashCode() : 0);
+    result = 31 * result + (tags != null ? tags.hashCode() : 0);
+    return result;
+  }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import static com.clouway.cuse.Employee.aNewEmployee;
 import static com.clouway.cuse.gae.filters.SearchFilters.isAnyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -210,7 +211,10 @@ public abstract class SearchEngineContractTest {
   @Test
   public void limitSearchByPositiveValue() {
 
-    store(new Employee(1l, "Jack Smith"), new Employee(2l, "Jack Samuel"), new Employee(3l, "Jack Jameson"));
+    Employee firstEmployee = new Employee(1l, "Jack Smith");
+    Employee secondEmployee = new Employee(2l, "Jack Samuel");
+
+    store(firstEmployee, secondEmployee, new Employee(3l, "Jack Jameson"));
 
     List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchFilters.is("Jack"))
                                                                .fetchMaximum(2)
@@ -219,31 +223,24 @@ public abstract class SearchEngineContractTest {
     sortEmployeesById(result);
 
     assertThat(result.size(), is(2));
-
-    //sort result for correct assert
-    orderEmployeesById(result);
-
-    assertThat(result.get(0).id, is(1l));
-    assertThat(result.get(1).id, is(2l));
+    assertThat(result, hasItem(firstEmployee));
+    assertThat(result, hasItem(secondEmployee));
   }
 
   @Test
   public void limitingSearchResultByZero() {
 
-    store(new User(1l, "Jack"), new User(2l, "Jack Adams"));
+    User firstUser = new User(1l, "Jack");
+    User secondUser = new User(2l, "Jack Adams");
+
+    store(firstUser, secondUser);
 
     List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("Jack")).fetchMaximum(0).now();
 
     assertThat(result.size(), is(2));
-    //sort result for correct assert
-    Collections.sort(result, new Comparator<User>() {
-      @Override
-      public int compare(User user1, User user2) {
-        return user1.id.compareTo(user2.id);
-      }
-    });
-    assertThat(result.get(0).id, is(1l));
-    assertThat(result.get(1).id, is(2l));
+
+    assertThat(result, hasItem(firstUser));
+    assertThat(result, hasItem(secondUser));
   }
 
   @Test(expected = SearchLimitExceededException.class)
@@ -430,24 +427,19 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByOffset() {
 
+    User secondUser = new User(2l, "Jack Briton");
+    User thirdUser = new User(3l, "Jack Milar");
+
     store(new User(1l, "Jack"));
-    store(new User(2l, "Jack Briton"));
-    store(new User(3l, "Jack Milar"));
+    store(secondUser);
+    store(thirdUser);
 
     List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("Jack")).offset(1).returnAll().now();
 
     assertThat(result.size(), is(2));
 
-    //sort result for correct assert
-    Collections.sort(result, new Comparator<User>() {
-      @Override
-      public int compare(User user1, User user2) {
-        return user1.name.compareTo(user2.name);
-      }
-    });
-
-    assertThat(result.get(0).name, is("Jack Briton"));
-    assertThat(result.get(1).name, is("Jack Milar"));
+    assertThat(result, hasItem(secondUser));
+    assertThat(result, hasItem(thirdUser));
   }
 
   @Test
@@ -620,20 +612,19 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByFieldGreaterThanOrEqualToGivenDate() {
 
+    Employee secondEmployee = aNewEmployee().id(2l).birthDate(aNewDate(2013, 12, 20)).build();
+    Employee thirdEmployee = aNewEmployee().id(3l).birthDate(aNewDate(2013, 12, 26)).build();
+
     store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 10)).build());
-    store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 12, 20)).build());
-    store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 12, 26)).build());
+    store(secondEmployee);
+    store(thirdEmployee);
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThanOrEqualTo(aNewDate(2013, 12, 20))).returnAll().now();
     sortEmployeesById(result);
 
     assertThat(result.size(), is(2));
-
-    //sort result for correct assert
-    orderEmployeesById(result);
-
-    assertThat(result.get(0).id, is(2l));
-    assertThat(result.get(1).id, is(3l));
+    assertThat(result, hasItem(secondEmployee));
+    assertThat(result, hasItem(thirdEmployee));
   }
 
   @Test
@@ -945,15 +936,6 @@ public abstract class SearchEngineContractTest {
 
     assertThat(result.size(), is(1));
     assertThat(result.get(0).name, is("Ltd. \"John - Adams\""));
-  }
-
-  private void orderEmployeesById(List<Employee> result) {
-    Collections.sort(result, new Comparator<Employee>() {
-      @Override
-      public int compare(Employee employee1, Employee employee2) {
-        return employee1.id.compareTo(employee2.id);
-      }
-    });
   }
 
   private void store(User... users) {
