@@ -10,18 +10,18 @@ class SearchEngineImpl implements SearchEngine {
   private final EntityLoader entityLoader;
   private final IndexingStrategyCatalog indexingStrategyCatalog;
   private final IdConverterCatalog idConverterCatalog;
-  private final IndexRegister indexRegister;
+  private final IndexRegistry indexRegistry;
   private final MatchedIdObjectFinder objectIdFinder;
 
   public SearchEngineImpl(EntityLoader entityLoader,
                           IdConverterCatalog idConverterCatalog,
                           IndexingStrategyCatalog indexingStrategyCatalog,
-                          IndexRegister indexRegister,
+                          IndexRegistry indexRegistry,
                           MatchedIdObjectFinder objectIdFinder) {
     this.entityLoader = entityLoader;
     this.idConverterCatalog = idConverterCatalog;
     this.indexingStrategyCatalog = indexingStrategyCatalog;
-    this.indexRegister = indexRegister;
+    this.indexRegistry = indexRegistry;
     this.objectIdFinder = objectIdFinder;
   }
 
@@ -34,7 +34,7 @@ class SearchEngineImpl implements SearchEngine {
       throw new NotConfiguredIndexingStrategyException();
     }
 
-    indexRegister.register(instance, strategy);
+    indexRegistry.register(instance, strategy);
 
   }
 
@@ -53,7 +53,7 @@ class SearchEngineImpl implements SearchEngine {
 
   @Override
   public void delete(String indexName, List<Long> objectIds) {
-    indexRegister.delete(indexName, objectIds);
+    indexRegistry.delete(indexName, objectIds);
   }
 
 }

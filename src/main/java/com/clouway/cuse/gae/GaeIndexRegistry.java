@@ -2,29 +2,28 @@ package com.clouway.cuse.gae;
 
 import com.clouway.cuse.gae.filedindexing.FieldCriteria;
 import com.clouway.cuse.gae.filedindexing.FieldIndexer;
-import com.clouway.cuse.spi.IndexRegister;
+import com.clouway.cuse.spi.IndexCreationFailureException;
+import com.clouway.cuse.spi.IndexRegistry;
 import com.clouway.cuse.spi.IndexingStrategy;
 import com.clouway.cuse.spi.annotations.SearchIndex;
-import com.google.appengine.api.search.Document;
-import com.google.appengine.api.search.Field;
-import com.google.appengine.api.search.Index;
-import com.google.appengine.api.search.IndexSpec;
-import com.google.appengine.api.search.SearchServiceFactory;
+import com.google.appengine.api.search.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
-public class GaeSearchApiIndexRegister implements IndexRegister {
+public class GaeIndexRegistry implements IndexRegistry {
+  private static final String INDEX_CREATION_FORMAT = "Index wasn't created due: %s (%s)";
 
-  private Map<FieldCriteria, FieldIndexer> actionCriterias = new HashMap<FieldCriteria, FieldIndexer>();
+  private final Map<FieldCriteria, FieldIndexer> actionCriterias;
+  private final SearchService searchService;
 
-  public GaeSearchApiIndexRegister(Map<FieldCriteria, FieldIndexer> actionCriterias) {
+  public GaeIndexRegistry(Map<FieldCriteria, FieldIndexer> actionCriterias, SearchService searchService) {
     this.actionCriterias = actionCriterias;
+    this.searchService = searchService;
   }
 
   @Override
@@ -33,24 +32,32 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
 
     Document document = buildDocument(instance, documentId);
 
-    addDocumentInIndex(strategy.getIndexName(), document);
+    indexDocument(strategy.getIndexName(), document);
   }
 
+  @Override
   public void delete(String indexName, List<Long> objectIds) {
     List<String> stringObjectIds = new ArrayList<String>();
     for (Long id : objectIds) {
       stringObjectIds.add(String.valueOf(id));
     }
-    loadIndex(indexName).delete(stringObjectIds);
+    getIndex(indexName).delete(stringObjectIds);
   }
 
-  private Index loadIndex(String indexName) {
-    return SearchServiceFactory.getSearchService().getIndex(IndexSpec.newBuilder()
-            .setName(indexName));
+  private void indexDocument(String indexName, Document document) {
+    PutResponse putResponse = getIndex(indexName).put(document);
+
+    for (OperationResult result : putResponse.getResults()) {
+
+      if (result.getCode() != StatusCode.OK) {
+        throw new IndexCreationFailureException(String.format(INDEX_CREATION_FORMAT, result.getCode(), result.getMessage()));
+      }
+    }
+
   }
 
-  private void addDocumentInIndex(String indexName, Document document) {
-    loadIndex(indexName).put(document);
+  private Index getIndex(String indexName) {
+    return searchService.getIndex(IndexSpec.newBuilder().setName(indexName));
   }
 
   private Document buildDocument(Object instance, String documentId) {
@@ -94,7 +101,7 @@ public class GaeSearchApiIndexRegister implements IndexRegister {
       } else {
         //sub index found
         Object childInstance = getFieldValue(instance, field);
-        if(childInstance != null) {
+        if (childInstance != null) {
           buildDocument(fieldName, childInstance, documentBuilder);
         }
       }

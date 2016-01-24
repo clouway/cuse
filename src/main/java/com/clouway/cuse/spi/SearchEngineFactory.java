@@ -1,6 +1,6 @@
 package com.clouway.cuse.spi;
 
-import com.clouway.cuse.gae.GaeSearchApiIndexRegister;
+import com.clouway.cuse.gae.GaeIndexRegistry;
 import com.clouway.cuse.gae.GaeSearchApiMatchedIdObjectFinder;
 import com.clouway.cuse.gae.filedindexing.FieldCriteria;
 import com.clouway.cuse.gae.filedindexing.FieldIndexer;
@@ -14,6 +14,7 @@ import com.clouway.cuse.gae.filedindexing.idindexer.IdFieldCriteria;
 import com.clouway.cuse.gae.filedindexing.idindexer.IdFieldIndexer;
 import com.clouway.cuse.gae.filedindexing.searchindex.SimpleSearchFieldCriteria;
 import com.clouway.cuse.gae.filedindexing.searchindex.SimpleSearchFieldIndexer;
+import com.google.appengine.api.search.SearchServiceFactory;
 import com.google.inject.util.Providers;
 
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class SearchEngineFactory {
     }};
 
 
-    GaeSearchApiIndexRegister indexRegister = new GaeSearchApiIndexRegister(actionCriterias);
+    GaeIndexRegistry indexRegister = new GaeIndexRegistry(actionCriterias, SearchServiceFactory.getSearchService());
     GaeSearchApiMatchedIdObjectFinder objectIdFinder = new GaeSearchApiMatchedIdObjectFinder();
 
     return new SearchEngineImpl(entityLoader, idConverterCatalog, indexingStrategyCatalog, indexRegister, objectIdFinder);

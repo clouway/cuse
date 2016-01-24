@@ -3,29 +3,23 @@ package com.clouway.cuse;
 import com.clouway.cuse.gae.filters.SearchFilters;
 import com.clouway.cuse.spi.*;
 import com.google.appengine.labs.repackaged.com.google.common.collect.Lists;
-import com.google.appengine.tools.development.testing.LocalSearchServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.appengine.labs.repackaged.com.google.common.collect.Sets;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.clouway.cuse.Employee.aNewEmployee;
 import static com.clouway.cuse.gae.filters.SearchFilters.isAnyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.isOneOf;
+import static org.junit.Assert.*;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -35,7 +29,6 @@ public abstract class SearchEngineContractTest {
   @Rule
   public final JUnitRuleMockery context = new JUnitRuleMockery();
 
-  private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalSearchServiceTestConfig());
 
   private SearchEngine searchEngine;
 
@@ -49,22 +42,14 @@ public abstract class SearchEngineContractTest {
 
   @Before
   public void setUp() {
-
-    helper.setUp();
-
     repository = createInMemoryRepository();
     searchEngine = createSearchEngine();
-  }
-
-  @After
-  public void tearDown() {
-    helper.tearDown();
   }
 
   @Test
   public void searchMatchingFieldValue() {
 
-    store(new User(1l, "Jack"));
+    store(new User(1L, "Jack"));
 
     List<User> dogs = searchEngine.search(User.class).where("name", SearchFilters.is("Jack")).returnAll().now();
 
@@ -75,7 +60,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void noMatchingFieldValue() {
 
-    store(new User(1l, "Jack"));
+    store(new User(1L, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("Jim")).returnAll().now();
 
@@ -85,7 +70,7 @@ public abstract class SearchEngineContractTest {
   @Test(expected = EmptySearchFilterException.class)
   public void searchByEmptyFieldValue() {
 
-    store(new User(1l, "Jack"));
+    store(new User(1L, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("")).returnAll().now();
 
@@ -95,7 +80,7 @@ public abstract class SearchEngineContractTest {
   @Test(expected = EmptySearchFilterException.class)
   public void searchByFieldValueContainingOnlyWhiteSpaces() {
 
-    store(new User(1l, "Jack"));
+    store(new User(1L, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("   ")).returnAll().now();
 
@@ -105,7 +90,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByNotExistingFieldValue() {
 
-    store(new User(1l, "Jack"));
+    store(new User(1L, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("age", SearchFilters.is("12")).returnAll().now();
 
@@ -115,19 +100,19 @@ public abstract class SearchEngineContractTest {
   @Test
   public void matchingAnyOfTheGivenValues() {
 
-    store(new User(1l, "Jack"), new User(2l, "Jim"));
+    store(new User(1L, "Jack"), new User(2l, "Jim"));
 
     List<User> result = searchEngine.search(User.class).where("name", isAnyOf("Jack", "Jim")).returnAll().now();
 
     assertThat(result.size(), is(2));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
     assertThat(result.get(1).id, is(2l));
   }
 
   @Test
   public void searchByMatchingOneValueThatMatchesAny() {
 
-    store(new User(1l, "Jack"), new User(2l, "Jim"));
+    store(new User(1L, "Jack"), new User(2l, "Jim"));
 
     List<User> result = searchEngine.search(User.class).where("name", isAnyOf("Jim")).returnAll().now();
 
@@ -138,7 +123,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void matchingValuesForNonExistingField() {
 
-    store(new User(1l, "Jack"));
+    store(new User(1L, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("age", isAnyOf("12", "14")).returnAll().now();
 
@@ -148,56 +133,56 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchForOneMatchByGivenQuery() {
 
-    store(new User(1l, "Jack Smith"));
+    store(new User(1L, "Jack Smith"));
 
     List<User> result = searchEngine.search(User.class).where("Jack Smith").returnAll().now();
 
     assertThat(result.size(), is(1));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
   }
 
   @Test
   public void searchForManyMatchesByGivenQuery() {
 
-    store(new User(1l, "Jack Smith"), new User(2l, "Johny Smith"));
+    store(new User(1L, "Jack Smith"), new User(2l, "Johny Smith"));
 
     List<User> result = searchEngine.search(User.class).where("Smith").returnAll().now();
 
     assertThat(result.size(), is(2));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
     assertThat(result.get(1).id, is(2l));
   }
 
   @Test
   public void searchByEmptyQuery() {
 
-    store(new User(1l, "Jack"));
+    store(new User(1L, "Jack"));
 
     List<User> result = searchEngine.search(User.class).where("").returnAll().now();
 
     assertThat(result.size(), is(1));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
     assertThat(result.get(0).name, is("Jack"));
   }
 
   @Test
   public void searchInGivenIndex() {
 
-    repository.store(1l, new User(1l));
-    searchEngine.register(new Employee(1l, "John"));
+    repository.store(1L, new User(1L));
+    searchEngine.register(new Employee(1L, "John"));
 
     List<User> result = searchEngine.search(User.class).inIndex(Employee.class)
                                                        .where("firstName", SearchFilters.is("John"))
                                                        .returnAll().now();
 
     assertThat(result.size(), is(1));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
   }
 
   @Test
   public void searchByMatchingTwoFieldValues() {
 
-    store(new Employee(1l, "John", "Adams"));
+    store(new Employee(1L, "John", "Adams"));
 
     List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchFilters.is("John"))
                                                                .where("lastName", SearchFilters.is("Adams"))
@@ -211,7 +196,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void limitSearchByPositiveValue() {
 
-    Employee firstEmployee = new Employee(1l, "Jack Smith");
+    Employee firstEmployee = new Employee(1L, "Jack Smith");
     Employee secondEmployee = new Employee(2l, "Jack Samuel");
 
     store(firstEmployee, secondEmployee, new Employee(3l, "Jack Jameson"));
@@ -230,7 +215,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void limitingSearchResultByZero() {
 
-    User firstUser = new User(1l, "Jack");
+    User firstUser = new User(1L, "Jack");
     User secondUser = new User(2l, "Jack Adams");
 
     store(firstUser, secondUser);
@@ -246,7 +231,7 @@ public abstract class SearchEngineContractTest {
   @Test(expected = SearchLimitExceededException.class)
   public void exceededSearchLimit() {
 
-    store(new User(1l, "John"));
+    store(new User(1L, "John"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("John"))
                                                        .fetchMaximum(1001)
@@ -258,7 +243,7 @@ public abstract class SearchEngineContractTest {
   @Test(expected = NegativeSearchLimitException.class)
   public void negativeSearchLimit() {
 
-    store(new User(1l, "John"));
+    store(new User(1L, "John"));
 
     List<User> result = searchEngine.search(User.class).where("name", SearchFilters.is("John")).fetchMaximum(-1).now();
 
@@ -268,19 +253,19 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchWithoutSpecifyingFiltersMatcher() {
 
-    store(new User(1l, "John"));
+    store(new User(1L, "John"));
 
     List<User> result = searchEngine.search(User.class).returnAll().now();
 
     assertThat(result.size(), is(1));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
     assertThat(result.get(0).name, is("John"));
   }
 
   @Test
   public void noMatchingResultsFromFullTextSearch() {
 
-    store(new User(1l, "John Adams"));
+    store(new User(1L, "John Adams"));
 
     List<User> result = searchEngine.search(User.class).where("Jack").returnAll().now();
 
@@ -290,13 +275,14 @@ public abstract class SearchEngineContractTest {
   @Test
   public void matchingResultsFromFullTextSearch() {
 
-    store(new User(1l, "John Adams"), new User(2l, "John Parker"));
+    store(new User(1L, "John Adams"), new User(2l, "John Parker"));
 
     List<User> result = searchEngine.search(User.class).where("Jo").returnAll().now();
 
     assertThat(result.size(), is(2));
-    assertThat(result.get(0).name, is("John Adams"));
-    assertThat(result.get(1).name, is("John Parker"));
+    Set<String> names = Sets.newHashSet(result.get(0).name, result.get(1).name);
+
+    assertThat(names, containsInAnyOrder("John Adams", "John Parker"));
   }
 
   @Test
@@ -306,7 +292,7 @@ public abstract class SearchEngineContractTest {
       never(entityLoader);
     }});
 
-    store(new User(1l, "John Adams"), new User(2l, "John Parker"));
+    store(new User(1L, "John Adams"), new User(2l, "John Parker"));
 
     List<String> result = searchEngine.searchIds(String.class).inIndex(User.class)
                                                               .where("name", SearchFilters.is("John"))
@@ -325,7 +311,7 @@ public abstract class SearchEngineContractTest {
       never(entityLoader);
     }});
 
-    store(new User(1l, "John Adams"), new User(2l, "John Parker"));
+    store(new User(1L, "John Adams"), new User(2l, "John Parker"));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
                                                           .where("name", SearchFilters.is("John"))
@@ -333,7 +319,7 @@ public abstract class SearchEngineContractTest {
                                                           .now();
 
     assertThat(result.size(), is(2));
-    assertThat(result.get(0), is(1l));
+    assertThat(result.get(0), is(1L));
     assertThat(result.get(1), is(2l));
   }
 
@@ -351,7 +337,7 @@ public abstract class SearchEngineContractTest {
       never(entityLoader);
     }});
 
-    store(new User(1l, "John Adams"));
+    store(new User(1L, "John Adams"));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
                                                           .where("name", SearchFilters.is("John"))
@@ -380,7 +366,7 @@ public abstract class SearchEngineContractTest {
       never(entityLoader);
     }});
 
-    store(new User(1l, "John"));
+    store(new User(1L, "John"));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
                                                           .where("name", SearchFilters.is("John"))
@@ -397,7 +383,7 @@ public abstract class SearchEngineContractTest {
       never(entityLoader);
     }});
 
-    store(new User(1l, "John"));
+    store(new User(1L, "John"));
 
     List<Long> result = searchEngine.searchIds(Long.class).where("name", SearchFilters.is("John")).returnAll().now();
 
@@ -407,7 +393,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void matchingBooleanFieldValues() {
 
-    store(new Employee(1l, true));
+    store(new Employee(1L, true));
 
     List<Employee> result = searchEngine.search(Employee.class).where("assigned", SearchFilters.is(true)).returnAll().now();
 
@@ -417,11 +403,11 @@ public abstract class SearchEngineContractTest {
   @Test
   public void matchingPrivateFieldValue() {
 
-    store(new User(1l, "John", "Adams"));
+    store(new User(1L, "John", "Adams"));
 
     List<User> result = searchEngine.search(User.class).where("family", SearchFilters.is("Adams")).returnAll().now();
 
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
   }
 
   @Test
@@ -430,7 +416,7 @@ public abstract class SearchEngineContractTest {
     User secondUser = new User(2l, "Jack Briton");
     User thirdUser = new User(3l, "Jack Milar");
 
-    store(new User(1l, "Jack"));
+    store(new User(1L, "Jack"));
     store(secondUser);
     store(thirdUser);
 
@@ -445,9 +431,9 @@ public abstract class SearchEngineContractTest {
   @Test
   public void deleteOneIndexById(){
 
-    store(new User(1l, "John"));
+    store(new User(1L, "John"));
 
-    searchEngine.delete("UserIndex", Lists.newArrayList(1l));
+    searchEngine.delete("UserIndex", Lists.newArrayList(1L));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
             .where("name", SearchFilters.is("John"))
@@ -460,11 +446,11 @@ public abstract class SearchEngineContractTest {
   @Test
   public void deleteMoreThanOneIndexByIds(){
 
-    store(new User(1l, "John"));
+    store(new User(1L, "John"));
     store(new User(2l, "John"));
 
     //name of index is configured in SearchId annotation over User class
-    searchEngine.delete("UserIndex", Lists.newArrayList(1l, 2l));
+    searchEngine.delete("UserIndex", Lists.newArrayList(1L, 2l));
 
     List<Long> result = searchEngine.searchIds(Long.class).inIndex(User.class)
             .where("name", SearchFilters.is("John"))
@@ -477,7 +463,7 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void searchByWordSeparation() throws Exception {
-    store(new User(1l, "John", "Adams", "separate by words"));
+    store(new User(1L, "John", "Adams", "separate by words"));
 
     List<User> result = searchEngine.search(User.class).where("description", SearchFilters.is("separate")).returnAll().now();
 
@@ -486,7 +472,7 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void shouldNotMatchWhenSearchByHalfWordWhereIsUsedWordSeparation() throws Exception {
-    store(new User(1l, "John", "Adams", "separate by words"));
+    store(new User(1L, "John", "Adams", "separate by words"));
 
     List<User> result = searchEngine.search(User.class).where("description", SearchFilters.is("sepa")).returnAll().now();
 
@@ -500,7 +486,7 @@ public abstract class SearchEngineContractTest {
       add("test");
     }};
 
-    store(new User(1l, tags));
+    store(new User(1L, tags));
 
     List<User> result = searchEngine.search(User.class).where("tags", SearchFilters.is("ample")).returnAll().now();
 
@@ -510,7 +496,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByFieldWithMultipleValuesOneOfWhichMatchesAnotherIndexedFieldValue() {
 
-    store(new Employee(1l, "John", "Adams"));
+    store(new Employee(1L, "John", "Adams"));
 
     List<Employee> result = searchEngine.search(Employee.class).where("firstName", isAnyOf("Someone", "Adams"))
                                                                .returnAll()
@@ -532,7 +518,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByMatchingOneOfTwoFieldValues() {
 
-    store(new Employee(1l, "John", "Brown"));
+    store(new Employee(1L, "John", "Brown"));
     store(new Employee(2l, "Tony", "John"));
 
     List<Employee> result = searchEngine.search(Employee.class)
@@ -548,7 +534,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByMatchingOneOfTwoFieldValuesAndHaveEqualityForOneOfTheFields() {
 
-    store(new Employee(1l, "John", "Brown"));
+    store(new Employee(1L, "John", "Brown"));
     store(new Employee(2l, "Tony", "John"));
 
     List<Employee> result = searchEngine.search(Employee.class)
@@ -564,40 +550,40 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByFieldLessThanGivenDate() {
 
-    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 20)).build());
+    store(aNewEmployee().id(1L).birthDate(aNewDate(2013, 12, 20)).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.lessThan(aNewDate(2013, 12, 25))).returnAll().now();
 
     assertThat(result.size(), is(1));
-    assertThat(result.get(0).id, is(equalTo(1l)));
+    assertThat(result.get(0).id, is(equalTo(1L)));
   }
 
   @Test
   public void searchByFieldGreaterThanGivenDate() {
 
-    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 10)).build());
+    store(aNewEmployee().id(1L).birthDate(aNewDate(2013, 12, 10)).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThan(aNewDate(2013, 12, 1))).returnAll().now();
 
     assertThat(result.size(), is(1));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
   }
 
   @Test
   public void searchByFieldEqualToGivenDate() {
 
-    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 20)).build());
+    store(aNewEmployee().id(1L).birthDate(aNewDate(2013, 12, 20)).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.equalTo(aNewDate(2013, 12, 20))).returnAll().now();
 
     assertThat(result.size(), is(1));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
   }
 
   @Test
   public void searchByFieldLessThanOrEqualToGivenDate() {
 
-    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 10)).build());
+    store(aNewEmployee().id(1L).birthDate(aNewDate(2013, 12, 10)).build());
     store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 12, 20)).build());
     store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 12, 26)).build());
 
@@ -605,7 +591,7 @@ public abstract class SearchEngineContractTest {
     sortEmployeesById(result);
 
     assertThat(result.size(), is(2));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
     assertThat(result.get(1).id, is(2l));
   }
 
@@ -615,7 +601,7 @@ public abstract class SearchEngineContractTest {
     Employee secondEmployee = aNewEmployee().id(2l).birthDate(aNewDate(2013, 12, 20)).build();
     Employee thirdEmployee = aNewEmployee().id(3l).birthDate(aNewDate(2013, 12, 26)).build();
 
-    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 10)).build());
+    store(aNewEmployee().id(1L).birthDate(aNewDate(2013, 12, 10)).build());
     store(secondEmployee);
     store(thirdEmployee);
 
@@ -630,7 +616,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void sortByDateInAscendingOrder() {
 
-    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 20)).build());
+    store(aNewEmployee().id(1L).birthDate(aNewDate(2013, 12, 20)).build());
     store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 1, 1)).build());
     store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 5, 18)).build());
 
@@ -641,13 +627,13 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(3));
     assertThat(result.get(0).id, is(equalTo(2l)));
     assertThat(result.get(1).id, is(equalTo(3l)));
-    assertThat(result.get(2).id, is(equalTo(1l)));
+    assertThat(result.get(2).id, is(equalTo(1L)));
   }
 
   @Test
   public void sortByDateInDescendingOrder() {
 
-    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 1, 5)).build());
+    store(aNewEmployee().id(1L).birthDate(aNewDate(2013, 1, 5)).build());
     store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 5, 10)).build());
     store(aNewEmployee().id(3l).birthDate(aNewDate(2013, 8, 20)).build());
 
@@ -658,7 +644,7 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(3));
     assertThat(result.get(0).id, is(equalTo(3l)));
     assertThat(result.get(1).id, is(equalTo(2l)));
-    assertThat(result.get(2).id, is(equalTo(1l)));
+    assertThat(result.get(2).id, is(equalTo(1L)));
   }
 
   @Test
@@ -666,7 +652,7 @@ public abstract class SearchEngineContractTest {
 
     Date birthDate = aNewDate(2013, 1, 1);
 
-    store(aNewEmployee().id(1l).firstName("John").birthDate(birthDate).build());
+    store(aNewEmployee().id(1L).firstName("John").birthDate(birthDate).build());
     store(aNewEmployee().id(2l).firstName("Adam").birthDate(birthDate).build());
     store(aNewEmployee().id(3l).firstName("Bob").birthDate(birthDate).build());
 
@@ -684,7 +670,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void sortByIntegerInDescendingOrder() {
 
-    store(aNewEmployee().id(1l).firstName("John").age(18).build());
+    store(aNewEmployee().id(1L).firstName("John").age(18).build());
     store(aNewEmployee().id(2l).firstName("John").age(25).build());
     store(aNewEmployee().id(3l).firstName("John").age(20).build());
 
@@ -695,13 +681,13 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(3));
     assertThat(result.get(0).id, is(2l));
     assertThat(result.get(1).id, is(3l));
-    assertThat(result.get(2).id, is(1l));
+    assertThat(result.get(2).id, is(1L));
   }
 
   @Test
   public void searchByDateFieldsGreaterThanGivenTime() {
 
-    store(aNewEmployee().id(1l).birthDate(aNewDate(2013, 12, 10, 9, 30)).build());
+    store(aNewEmployee().id(1L).birthDate(aNewDate(2013, 12, 10, 9, 30)).build());
     store(aNewEmployee().id(2l).birthDate(aNewDate(2013, 12, 10, 11, 0)).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThan(aNewDate(2013, 12, 10, 9, 45)))
@@ -714,7 +700,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void nullDateFieldsAreNotIndexed() {
 
-    store(aNewEmployee().id(1l).build());
+    store(aNewEmployee().id(1L).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.is("null")).returnAll().now();
 
@@ -724,7 +710,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByTextFieldWithoutValue() {
 
-    store(aNewEmployee().id(1l).build());
+    store(aNewEmployee().id(1L).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("firstName", SearchFilters.is("John")).returnAll().now();
 
@@ -734,7 +720,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByNumberFieldWithoutValue() {
 
-    store(aNewEmployee().id(1l).build());
+    store(aNewEmployee().id(1L).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("birthDate", SearchFilters.greaterThan(aNewDate(2013, 12, 10, 9, 45))).returnAll().now();
 
@@ -744,19 +730,19 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchForMatchingAllOfTheFieldValues() {
 
-    store(aNewEmployee().id(1l).tags(Arrays.asList("1", "2", "answered")).build());
+    store(aNewEmployee().id(1L).tags(Arrays.asList("1", "2", "answered")).build());
     store(aNewEmployee().id(2l).tags(Arrays.asList("test")).build());
 
     List<Employee> result = searchEngine.search(Employee.class).where("tags", SearchFilters.is(Arrays.asList("1", "2", "answered"))).returnAll().now();
 
     assertThat(result.size(), is(1));
-    assertThat(result.get(0).id, is(1l));
+    assertThat(result.get(0).id, is(1L));
   }
 
   @Test
   public void searchForMatchingAnyOfTheFieldValues() {
 
-    store(aNewEmployee().id(1l).age(18).build());
+    store(aNewEmployee().id(1L).age(18).build());
     store(aNewEmployee().id(2l).age(19).build());
     store(aNewEmployee().id(3l).age(20).build());
 
@@ -765,13 +751,13 @@ public abstract class SearchEngineContractTest {
                                                                .returnAll().now();
 
     assertThat(result.size(), is(2));
-    assertThat(result.get(0).id, is(equalTo(1l)));
+    assertThat(result.get(0).id, is(equalTo(1L)));
     assertThat(result.get(1).id, is(equalTo(3l)));
   }
 
   @Test
   public void defaultSearchWithAnnotatedProperty() throws Exception {
-    Ticket ticket = new Ticket(1l, "Some Title", "Description");
+    Ticket ticket = new Ticket(1L, "Some Title", "Description");
     ticket.setComment("some comment is add");
     store(ticket);
 
@@ -783,7 +769,7 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void fullWordSearchWithAnnotatedProperty() throws Exception {
-    store(new Ticket(1l, "Some Title", "Description"));
+    store(new Ticket(1L, "Some Title", "Description"));
 
     List<Ticket> tickets = searchEngine.search(Ticket.class).where("title", SearchFilters.is("Title")).returnAll().now();
 
@@ -793,7 +779,7 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void fullTextSearchWithAnnotatedProperty() throws Exception {
-    store(new Ticket(1l, "Some Title", "Description"));
+    store(new Ticket(1L, "Some Title", "Description"));
 
     List<Ticket> tickets = searchEngine.search(Ticket.class).where("description", SearchFilters.is("desc")).returnAll().now();
 
@@ -804,7 +790,7 @@ public abstract class SearchEngineContractTest {
   @Test
   public void searchByDateWithAnnotatedProperty() throws Exception {
 
-    Ticket ticket = new Ticket(1l, "Title", "Description");
+    Ticket ticket = new Ticket(1L, "Title", "Description");
     ticket.setCreationDate(aNewDate(2013, 12, 20));
 
     store(ticket);
@@ -816,7 +802,7 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void shouldNotFindResultsWhenSearchByIgnoredProperty() throws Exception {
-    Ticket ticket = new Ticket(1l, "Title", "Description");
+    Ticket ticket = new Ticket(1L, "Title", "Description");
     ticket.setDetails("some info");
 
     store(ticket);
@@ -900,7 +886,7 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void escapeSpecialSymbols() throws Exception {
-    store(new User(1l, ":,+-=<>"));
+    store(new User(1L, ":,+-=<>"));
 
     List<User> result = searchEngine.search(User.class).where(":,+-=<>").returnAll().now();
 
@@ -908,10 +894,10 @@ public abstract class SearchEngineContractTest {
   }
 
   @Test
-  public void searchWithExactMathOfWord() throws Exception {
-    store(new User(10l, "user d8:66:66"));
-    store(new User(20l, "user d8:66:b6"));
-    store(new User(30l, "user d8:66:b7"));
+  public void searchWithExactMatchOfWord() throws Exception {
+    store(new User(10L, "user d8:66:66"));
+    store(new User(20L, "user d8:66:b6"));
+    store(new User(30L, "user d8:66:b7"));
 
     List<User> result = searchEngine.search(User.class).where("\"d8:66:66\"").returnAll().now();
 
@@ -920,7 +906,7 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void shouldNotEscapeSpecialSymbolsInQuotedText() throws Exception {
-    store(new User(1l, "Ltd. \"John - Adams\""), new User(2l, "Tom"));
+    store(new User(1L, "Ltd. \"John - Adams\""), new User(2l, "Tom"));
 
     List<User> result = searchEngine.search(User.class).where("\"Ltd. John - Adams\"").returnAll().now();
 
@@ -930,7 +916,7 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void escapeQuotesWhenTheyAreOddCount() throws Exception {
-    store(new User(1l, "Ltd. \"John - Adams\""), new User(2l, "Tom"));
+    store(new User(1L, "Ltd. \"John - Adams\""), new User(2l, "Tom"));
 
     List<User> result = searchEngine.search(User.class).where("Ltd. \" John - Adams").returnAll().now();
 
