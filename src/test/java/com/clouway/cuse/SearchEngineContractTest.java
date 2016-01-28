@@ -2,6 +2,8 @@ package com.clouway.cuse;
 
 import com.clouway.cuse.gae.filters.SearchFilters;
 import com.clouway.cuse.spi.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
