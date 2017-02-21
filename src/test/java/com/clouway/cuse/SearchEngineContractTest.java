@@ -2,6 +2,7 @@ package com.clouway.cuse;
 
 import com.clouway.cuse.gae.filters.SearchFilters;
 import com.clouway.cuse.spi.*;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.jmock.Expectations;
@@ -18,7 +19,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -888,7 +889,7 @@ public abstract class SearchEngineContractTest {
     store(new User(1L, ":,+-=<>"));
 
     List<User> result = searchEngine.search(User.class).where(":,+-=<>").returnAll().now();
-
+    DatastoreServiceFactory.getDatastoreService();
     assertThat(result.size(), is(1));
   }
 
@@ -922,6 +923,41 @@ public abstract class SearchEngineContractTest {
     assertThat(result.size(), is(1));
     assertThat(result.get(0).name, is("Ltd. \"John - Adams\""));
   }
+
+  @Test
+  public void searchInAtomicFields() throws Exception {
+
+    registerIndex(123L, new AtomicTagsListIndex(123L, "old", "bss"));
+    registerIndex(123L, new AtomicTagsListIndex(123L, "old bss", "bss"));
+
+    List<AtomicTagsListIndex> result = searchEngine.search(AtomicTagsListIndex.class).where("old").returnAll().now();
+    assertThat(result.size(), is(0));
+    result = searchEngine.search(AtomicTagsListIndex.class).where("old bss").returnAll().now();
+    assertThat(result.size(), is(1));
+    assertThat(result.get(0).id, is(123L));
+  }
+
+  @Test
+  public void searchInAtomicFieldsWithSpecificCharacters() throws Exception {
+
+    registerIndex(123L, new AtomicTagsListIndex(123L, "old:bss"));
+    registerIndex(124L, new AtomicTagsListIndex(124L, "old:bss"));
+    registerIndex(125L, new AtomicTagsListIndex(125L, "old:bss+oss"));
+
+
+    List<AtomicTagsListIndex> result = searchEngine.search(AtomicTagsListIndex.class).where("old").returnAll().now();
+    assertThat(result.size(), is(0));
+    result = searchEngine.search(AtomicTagsListIndex.class).where("old:bss").returnAll().now();
+    assertThat(result.size(), is(2));
+    result = searchEngine.search(AtomicTagsListIndex.class).where("old:bss+oss").returnAll().now();
+    assertThat(result.size(), is(1));
+  }
+
+  private void registerIndex(long id, Object index) {
+    repository.store(id, index);
+    searchEngine.register(index);
+  }
+
 
   private void store(User... users) {
 

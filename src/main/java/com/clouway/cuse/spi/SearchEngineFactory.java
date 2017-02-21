@@ -4,6 +4,8 @@ import com.clouway.cuse.gae.GaeIndexRegistry;
 import com.clouway.cuse.gae.GaeSearchApiMatchedIdObjectFinder;
 import com.clouway.cuse.gae.filedindexing.FieldCriteria;
 import com.clouway.cuse.gae.filedindexing.FieldIndexer;
+import com.clouway.cuse.gae.filedindexing.atomic.AtomicFieldCriteria;
+import com.clouway.cuse.gae.filedindexing.atomic.AtomicFiledIndexer;
 import com.clouway.cuse.gae.filedindexing.dateindex.DateFieldCriteria;
 import com.clouway.cuse.gae.filedindexing.dateindex.DateFieldIndexer;
 import com.clouway.cuse.gae.filedindexing.fulltextindex.FullTextSearchFieldCriteria;
@@ -14,7 +16,9 @@ import com.clouway.cuse.gae.filedindexing.idindexer.IdFieldCriteria;
 import com.clouway.cuse.gae.filedindexing.idindexer.IdFieldIndexer;
 import com.clouway.cuse.gae.filedindexing.searchindex.SimpleSearchFieldCriteria;
 import com.clouway.cuse.gae.filedindexing.searchindex.SimpleSearchFieldIndexer;
+import com.google.appengine.api.search.SearchService;
 import com.google.appengine.api.search.SearchServiceFactory;
+import com.google.inject.Provider;
 import com.google.inject.util.Providers;
 
 import java.util.HashMap;
@@ -54,10 +58,16 @@ public class SearchEngineFactory {
       put(new DateFieldCriteria(), new DateFieldIndexer());
       put(new FullWordSearchFieldCriteria(), new FullWordSearchFieldIndexer());
       put(new IdFieldCriteria(), new IdFieldIndexer());
+      put(new AtomicFieldCriteria(), new AtomicFiledIndexer());
     }};
 
 
-    GaeIndexRegistry indexRegister = new GaeIndexRegistry(actionCriterias, SearchServiceFactory.getSearchService());
+    GaeIndexRegistry indexRegister = new GaeIndexRegistry(actionCriterias, new Provider<SearchService>() {
+      @Override
+      public SearchService get() {
+        return SearchServiceFactory.getSearchService();
+      }
+    });
     GaeSearchApiMatchedIdObjectFinder objectIdFinder = new GaeSearchApiMatchedIdObjectFinder();
 
     return new SearchEngineImpl(entityLoader, idConverterCatalog, indexingStrategyCatalog, indexRegister, objectIdFinder);

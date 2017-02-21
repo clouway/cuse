@@ -13,6 +13,7 @@ import com.google.appengine.api.search.PutResponse;
 import com.google.appengine.api.search.SearchService;
 import com.google.appengine.api.search.StatusCode;
 import com.google.common.collect.Lists;
+import com.google.inject.util.Providers;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -60,7 +61,7 @@ public class RegisterNewIndexesTest {
   }
 
   private void checkIndexingThatWillReturn(final PutResponse response) {
-    GaeIndexRegistry registry = new GaeIndexRegistry(new HashMap<FieldCriteria, FieldIndexer>(), searchService);
+    GaeIndexRegistry registry = new GaeIndexRegistry(new HashMap<FieldCriteria, FieldIndexer>(), Providers.of(searchService));
 
     final AddressIndex addressIndex = new AddressIndex(1L, "N/A", "1000");
 
