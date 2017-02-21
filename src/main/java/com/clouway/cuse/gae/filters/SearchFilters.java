@@ -6,24 +6,15 @@ import com.clouway.cuse.spi.filters.SearchFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static com.clouway.cuse.spi.EscapeUtil.escape;
 
 /**
  * @author Ivan Lazov <ivan.lazov@clouway.com>
  */
 public class SearchFilters {
 
-  private static Map<String, String> escapeSymbolsMap = new HashMap<String, String>() {{
-    put(":", "\\:");
-    put(",", "\\,");
-    put("+", "\\+");
-    put("-", "\\\\-");
-    put("=", "\\=");
-    put("<", "\\<");
-    put(">", "\\>");
-  }};
 
   public static SearchFilter is(String value) {
     value = escapeSymbols(value);
@@ -101,9 +92,7 @@ public class SearchFilters {
 
     value = value.trim();
 
-    for (String symbol : escapeSymbolsMap.keySet()) {
-      value = value.replace(symbol, escapeSymbolsMap.get(symbol));
-    }
+    value = escape(value);
 
     int countOfQuotes = value.length() - value.replaceAll("\"", "").length();
 

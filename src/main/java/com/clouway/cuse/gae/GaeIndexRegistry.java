@@ -7,6 +7,7 @@ import com.clouway.cuse.spi.IndexRegistry;
 import com.clouway.cuse.spi.IndexingStrategy;
 import com.clouway.cuse.spi.annotations.SearchIndex;
 import com.google.appengine.api.search.*;
+import com.google.inject.Provider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +20,9 @@ public class GaeIndexRegistry implements IndexRegistry {
   private static final String INDEX_CREATION_FORMAT = "Index wasn't created due: %s (%s)";
 
   private final Map<FieldCriteria, FieldIndexer> actionCriterias;
-  private final SearchService searchService;
+  private final Provider<SearchService> searchService;
 
-  public GaeIndexRegistry(Map<FieldCriteria, FieldIndexer> actionCriterias, SearchService searchService) {
+  public GaeIndexRegistry(Map<FieldCriteria, FieldIndexer> actionCriterias, Provider<SearchService> searchService) {
     this.actionCriterias = actionCriterias;
     this.searchService = searchService;
   }
@@ -57,7 +58,7 @@ public class GaeIndexRegistry implements IndexRegistry {
   }
 
   private Index getIndex(String indexName) {
-    return searchService.getIndex(IndexSpec.newBuilder().setName(indexName));
+    return searchService.get().getIndex(IndexSpec.newBuilder().setName(indexName));
   }
 
   private Document buildDocument(Object instance, String documentId) {
