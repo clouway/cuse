@@ -32,7 +32,7 @@ public class EqualitySearchFilter implements SearchFilter {
 
     if(field == null || "".equals(field)) {
       return value;
-    }
+    }               //////////////////
 
     if (value != null && !"".equals(value)) {
       filter = field + ":" + value + " ";
