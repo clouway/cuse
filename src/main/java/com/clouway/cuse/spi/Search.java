@@ -70,6 +70,13 @@ public class Search<T> {
       return this;
     }
 
+    public SearchBuilder and() {
+      if (!filters.isEmpty()) {
+        filters.add(" AND ");
+      }
+      return this;
+    }
+
     public SearchBuilder<T> inIndex(Class aClass) {
       SearchIndex searchIndex = (SearchIndex) aClass.getAnnotation(SearchIndex.class);
       if(searchIndex != null) {
