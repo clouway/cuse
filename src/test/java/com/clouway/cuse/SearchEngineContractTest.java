@@ -952,6 +952,32 @@ public abstract class SearchEngineContractTest {
     result = searchEngine.search(AtomicTagsListIndex.class).where("old:bss+oss").returnAll().now();
     assertThat(result.size(), is(1));
   }
+  
+  @Test
+  public void searchInAtomicFieldsWithComplexQuery() throws Exception {
+
+    registerIndex(123L, new AtomicTagsListIndex(123L, Lists.newArrayList("123","456"),"old bss"));
+    registerIndex(124L, new AtomicTagsListIndex(124L, Lists.newArrayList("123","456"),"old bss"));
+    registerIndex(125L, new AtomicTagsListIndex(125L, Lists.newArrayList("123","456"), "old bss oss"));
+
+    List<AtomicTagsListIndex> result = searchEngine.search(AtomicTagsListIndex.class).where("refs", isAnyOf("123","789")).and().where("old").returnAll().now();
+    assertThat(result.size(), is(0));
+    result = searchEngine.search(AtomicTagsListIndex.class).where("refs", isAnyOf("123","789")).and().where("old bss").returnAll().now();
+    assertThat(result.size(), is(2));
+    result = searchEngine.search(AtomicTagsListIndex.class).where("refs", isAnyOf("123","789")).and().where("old bss oss").returnAll().now();
+    assertThat(result.size(), is(1));
+  }
+
+  @Test
+  public void searchEmptyString() throws Exception {
+
+    registerIndex(123L, new AtomicTagsListIndex(123L, "old bss"));
+    registerIndex(124L, new AtomicTagsListIndex(124L, "old bss"));
+    registerIndex(125L, new AtomicTagsListIndex(125L, "old bss oss"));
+
+    List<AtomicTagsListIndex> result = searchEngine.search(AtomicTagsListIndex.class).and().where("").and().returnAll().now();
+    assertThat(result.size(), is(3));
+  }
 
   private void registerIndex(long id, Object index) {
     repository.store(id, index);
