@@ -895,11 +895,11 @@ public abstract class SearchEngineContractTest {
 
   @Test
   public void searchWithExactMatchOfWord() throws Exception {
-    store(new User(10L, "user d8:66:66"));
-    store(new User(20L, "user d8:66:b6"));
-    store(new User(30L, "user d8:66:b7"));
+    store(new User(10L, "user d8:66:b6"));
+    store(new User(20L, "user d8:66:b7"));
+    store(new User(30L, "user d8:66:b8"));
 
-    List<User> result = searchEngine.search(User.class).where("\"d8:66:66\"").returnAll().now();
+    List<User> result = searchEngine.search(User.class).where("\"d8:66:b6\"").returnAll().now();
 
     assertThat(result.size(), is(1));
   }
