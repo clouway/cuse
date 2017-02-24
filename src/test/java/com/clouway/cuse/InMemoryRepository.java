@@ -3,7 +3,7 @@ package com.clouway.cuse;
 import com.clouway.cuse.spi.EntityLoader;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +12,8 @@ import java.util.Map;
  */
 public class InMemoryRepository implements EntityLoader {
 
-  Map<Class<?>, List<Long>> classes = new HashMap<Class<?>, List<Long>>();
-  Map<Long, Object> objects = new HashMap<Long, Object>();
+  Map<Class<?>, List<Long>> classes = new LinkedHashMap<Class<?>, List<Long>>();
+  Map<Long, Object> objects = new LinkedHashMap<Long, Object>();
 
   public void store(Long objectId, Object object) {
 
