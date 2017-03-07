@@ -1,5 +1,8 @@
 package com.clouway.cuse.spi;
 
+import com.clouway.cuse.spi.annotations.SearchIndex;
+
+import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
@@ -12,6 +15,7 @@ class SearchEngineImpl implements SearchEngine {
   private final IdConverterCatalog idConverterCatalog;
   private final IndexRegistry indexRegistry;
   private final MatchedIdObjectFinder objectIdFinder;
+
 
   public SearchEngineImpl(EntityLoader entityLoader,
                           IdConverterCatalog idConverterCatalog,
@@ -26,16 +30,26 @@ class SearchEngineImpl implements SearchEngine {
   }
 
   public void register(Object instance) {
-
     Class instanceClass = instance.getClass();
     IndexingStrategy strategy = indexingStrategyCatalog.get(instanceClass);
-
     if (strategy == null) {
       throw new NotConfiguredIndexingStrategyException();
     }
-
     indexRegistry.register(instance, strategy);
+  }
 
+  public void registerAll(List<? extends Object> objects) {
+    if (objects.isEmpty()) {
+      return;
+    }
+    if (isWithEquivalentSearchIndexes(objects)) {
+      Class instanceClass = objects.get(0).getClass();
+      IndexingStrategy strategy = indexingStrategyCatalog.get(instanceClass);
+      if (strategy == null) {
+        throw new NotConfiguredIndexingStrategyException();
+      }
+      indexRegistry.registerAll(objects, strategy);
+    }
   }
 
   public <T> Search.SearchBuilder<T> search(Class<T> clazz) {
@@ -56,4 +70,20 @@ class SearchEngineImpl implements SearchEngine {
     indexRegistry.delete(indexName, objectIds);
   }
 
+  private boolean isWithEquivalentSearchIndexes(List<? extends Object> objects) {
+    Annotation searchIndexToMatch = objects.get(0).getClass().getAnnotation(SearchIndex.class);
+    if (searchIndexToMatch == null) {
+      throw new SearchIndexMissingException();
+    }
+    for (Object object : objects) {
+      Annotation searchIndex = object.getClass().getAnnotation(SearchIndex.class);
+      if (searchIndex == null) {
+        throw new SearchIndexMissingException();
+      }
+      if (!searchIndexToMatch.equals(searchIndex)) {
+        throw new SearchIndexMissmatchException();
+      }
+    }
+    return true;
+  }
 }

@@ -7,6 +7,7 @@ import com.clouway.cuse.spi.IndexRegistry;
 import com.clouway.cuse.spi.IndexingStrategy;
 import com.clouway.cuse.spi.annotations.SearchIndex;
 import com.google.appengine.api.search.*;
+import com.google.common.collect.Lists;
 import com.google.inject.Provider;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.Map;
  */
 public class GaeIndexRegistry implements IndexRegistry {
   private static final String INDEX_CREATION_FORMAT = "Index wasn't created due: %s (%s)";
+  private static final Integer MAX_BATCH_SIZE = 200;
 
   private final Map<FieldCriteria, FieldIndexer> actionCriterias;
   private final Provider<SearchService> searchService;
@@ -37,6 +39,21 @@ public class GaeIndexRegistry implements IndexRegistry {
   }
 
   @Override
+  public void registerAll(List<? extends Object> instances, IndexingStrategy strategy) {
+    //There is a Index.put() limitation to 200 documents as described :https://cloud.google.com/appengine/docs/standard/python/search/best_practices
+    List<? extends List<?>> parts = Lists.partition(instances, MAX_BATCH_SIZE);
+    for (List<?> part : parts) {
+      List<Document> documents = Lists.newArrayList();
+      for (Object instance : part) {
+        String documentId = strategy.getId(instance);
+        Document document = buildDocument(instance, documentId);
+        documents.add(document);
+      }
+      indexDocument(strategy.getIndexName(), documents.toArray(new Document[documents.size()]));
+    }
+  }
+
+  @Override
   public void delete(String indexName, List<Long> objectIds) {
     List<String> stringObjectIds = new ArrayList<String>();
     for (Long id : objectIds) {
@@ -45,16 +62,35 @@ public class GaeIndexRegistry implements IndexRegistry {
     getIndex(indexName).delete(stringObjectIds);
   }
 
-  private void indexDocument(String indexName, Document document) {
-    PutResponse putResponse = getIndex(indexName).put(document);
-
+  private void indexDocument(String indexName, Document... document) {
+    final int maxRetry = 3;
+    int attempts = 0;
+    int delay = 2;
+    PutResponse putResponse;
+    while (true) {
+      try {
+        putResponse = getIndex(indexName).put(document);
+      } catch (PutException e) {
+        if (StatusCode.TRANSIENT_ERROR.equals(e.getOperationResult().getCode())
+                && ++attempts < maxRetry) { // retrying
+          try {
+            Thread.sleep(delay * 1000);
+          } catch (InterruptedException e1) {
+            e1.printStackTrace();
+          }
+          delay *= 2; // exponential backoff
+          continue;
+        } else {
+          throw e; // otherwise throw
+        }
+      }
+      break;
+    }
     for (OperationResult result : putResponse.getResults()) {
-
       if (result.getCode() != StatusCode.OK) {
         throw new IndexCreationFailureException(String.format(INDEX_CREATION_FORMAT, result.getCode(), result.getMessage()));
       }
     }
-
   }
 
   private Index getIndex(String indexName) {

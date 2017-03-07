@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * @author Mihail Lesikov (mlesikov@gmail.com)
@@ -952,19 +952,19 @@ public abstract class SearchEngineContractTest {
     result = searchEngine.search(AtomicTagsListIndex.class).where("old:bss+oss").returnAll().now();
     assertThat(result.size(), is(1));
   }
-  
+
   @Test
   public void searchInAtomicFieldsWithComplexQuery() throws Exception {
 
-    registerIndex(123L, new AtomicTagsListIndex(123L, Lists.newArrayList("123","456"),"old bss"));
-    registerIndex(124L, new AtomicTagsListIndex(124L, Lists.newArrayList("123","456"),"old bss"));
-    registerIndex(125L, new AtomicTagsListIndex(125L, Lists.newArrayList("123","456"), "old bss oss"));
+    registerIndex(123L, new AtomicTagsListIndex(123L, Lists.newArrayList("123", "456"), "old bss"));
+    registerIndex(124L, new AtomicTagsListIndex(124L, Lists.newArrayList("123", "456"), "old bss"));
+    registerIndex(125L, new AtomicTagsListIndex(125L, Lists.newArrayList("123", "456"), "old bss oss"));
 
-    List<AtomicTagsListIndex> result = searchEngine.search(AtomicTagsListIndex.class).where("refs", isAnyOf("123","789")).and().where("old").returnAll().now();
+    List<AtomicTagsListIndex> result = searchEngine.search(AtomicTagsListIndex.class).where("refs", isAnyOf("123", "789")).and().where("old").returnAll().now();
     assertThat(result.size(), is(0));
-    result = searchEngine.search(AtomicTagsListIndex.class).where("refs", isAnyOf("123","789")).and().where("old bss").returnAll().now();
+    result = searchEngine.search(AtomicTagsListIndex.class).where("refs", isAnyOf("123", "789")).and().where("old bss").returnAll().now();
     assertThat(result.size(), is(2));
-    result = searchEngine.search(AtomicTagsListIndex.class).where("refs", isAnyOf("123","789")).and().where("old bss oss").returnAll().now();
+    result = searchEngine.search(AtomicTagsListIndex.class).where("refs", isAnyOf("123", "789")).and().where("old bss oss").returnAll().now();
     assertThat(result.size(), is(1));
   }
 
@@ -977,6 +977,66 @@ public abstract class SearchEngineContractTest {
 
     List<AtomicTagsListIndex> result = searchEngine.search(AtomicTagsListIndex.class).and().where("").and().returnAll().now();
     assertThat(result.size(), is(3));
+  }
+
+  @Test
+  public void registerDocumentsInBulkChunksWithEmployees() throws Exception {
+    List<Employee> employeeList = generateGiantListOfEmployees(402,"Foo","Bar");
+    storeAllEmployees(employeeList);
+    store(new User(2L));
+    List<Employee> result = searchEngine.search(Employee.class).returnAll().now();
+    assertThat(employeeList.size(), is(result.size()));
+  }
+
+  @Test
+  public void registeringDocumentsInBulkChunksWithUsers() throws Exception {
+    List<User> userList=Lists.newArrayList(new User(1L),new User(2L),new User(3L));
+    storeAllUsers(userList);
+    store(new Employee(4L, "Foo"));
+    List<User> result = searchEngine.search(User.class).returnAll().now();
+    assertThat(result.size(), is(userList.size()));
+  }
+
+  @Test
+  public void registeringDocumentsInBulkChunksWithTickets() throws Exception {
+    List<Ticket> ticketList=Lists.newArrayList(new Ticket(1L, "Title", "Description"),
+                                               new Ticket(2L, "Titles", "Descriptions"),
+                                               new Ticket(3L, "The Title", "No Description"));
+    storeAllTickets(ticketList);
+    store(new User(5L));
+    List<Ticket> result = searchEngine.search(Ticket.class).returnAll().now();
+    assertThat(result.size(), is(ticketList.size()));
+  }
+
+  @Test
+  public void searchingForNonExistentEmployeeAfterBulkRegistering() throws Exception {
+    List<Employee> employeeList = generateGiantListOfEmployees(201,"Foo","Bar");
+    storeAllEmployees(employeeList);
+    List<Employee> result = searchEngine.search(Employee.class).where("Rab").returnAll().now();
+    assertThat(result.size(), is(0));
+  }
+
+  @Test(expected = SearchIndexMissingException.class)
+  public void tryingToAddObjectWithoutSearchIndex() throws Exception {
+    storeAllObjects(Arrays.asList(new Object()));
+  }
+
+  @Test(expected = SearchIndexMissmatchException.class)
+  public void tryingToRegisterListContainingDifferentObjects() throws Exception {
+    List<Object> heterogeneousList=Lists.newArrayList();
+    heterogeneousList.add(new User(1L));
+    heterogeneousList.add(new Employee(2L,"Foo","Bar"));
+    storeAllObjects(heterogeneousList);
+  }
+
+  private List<Employee> generateGiantListOfEmployees(Integer size,String firstName,String lastName) {
+    List<Employee> employeeList = new LinkedList<Employee>();
+    long id = 1L;
+    for (int i = 0; i < size; i++) {
+      employeeList.add(new Employee(id, firstName, lastName));
+      id++;
+    }
+    return employeeList;
   }
 
   private void registerIndex(long id, Object index) {
@@ -993,6 +1053,23 @@ public abstract class SearchEngineContractTest {
     }
   }
 
+  private void storeAllUsers(List<User> users) {
+    long id = 1L;
+    for (User user : users) {
+      repository.store(id, user);
+      id++;
+    }
+    searchEngine.registerAll(users);
+  }
+  private void storeAllObjects(List<Object> objects) {
+    long id = 1L;
+    for (Object object : objects) {
+      repository.store(id, object);
+      id++;
+    }
+    searchEngine.registerAll(objects);
+  }
+
   private void store(Employee... employees) {
 
     for (Employee employee : employees) {
@@ -1001,12 +1078,30 @@ public abstract class SearchEngineContractTest {
     }
   }
 
+  private void storeAllEmployees(List<Employee> employees) {
+    long id = 1L;
+    for (Employee employee : employees) {
+      repository.store(id, employee);
+      id++;
+    }
+    searchEngine.registerAll(employees);
+  }
+
   private void store(Ticket... tickets) {
 
     for (Ticket ticket : tickets) {
       repository.store(ticket.getId(), ticket);
       searchEngine.register(ticket);
     }
+  }
+
+  private void storeAllTickets(List<Ticket> tickets) {
+    long id = 1L;
+    for (Ticket ticket : tickets) {
+      repository.store(id, ticket);
+      id++;
+    }
+    searchEngine.registerAll(tickets);
   }
 
   private void sortEmployeesById(List<Employee> employees) {
